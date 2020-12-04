@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: artifacts:mobilertc:unspecified@jar">
+    <ANNOTATIONS>
+      <root url="jar://$PROJECT_DIR$/mobilertc/build/.transforms/26c39ad6e5c5be62185890fb60dfd160/jetified-mobilertc/annotations.zip!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/mobilertc/build/.transforms/26c39ad6e5c5be62185890fb60dfd160/jetified-mobilertc/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/mobilertc/build/.transforms/26c39ad6e5c5be62185890fb60dfd160/jetified-mobilertc/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
