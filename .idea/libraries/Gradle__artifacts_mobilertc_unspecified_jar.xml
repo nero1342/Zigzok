@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: artifacts:mobilertc:unspecified@jar">
     <ANNOTATIONS>
-      <root url="jar://$PROJECT_DIR$/mobilertc/build/.transforms/4c27ac91915c51ab0ce0c6ad2bac5317/jetified-mobilertc/annotations.zip!/" />
+      <root url="jar://$PROJECT_DIR$/mobilertc/build/.transforms/3de5c8ade8f9deb3164c87a364000acf/jetified-mobilertc/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/mobilertc/build/.transforms/4c27ac91915c51ab0ce0c6ad2bac5317/jetified-mobilertc/AndroidManifest.xml" />
-      <root url="jar://$PROJECT_DIR$/mobilertc/build/.transforms/4c27ac91915c51ab0ce0c6ad2bac5317/jetified-mobilertc/jars/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/mobilertc/build/.transforms/4c27ac91915c51ab0ce0c6ad2bac5317/jetified-mobilertc/res" />
+      <root url="file://$PROJECT_DIR$/mobilertc/build/.transforms/3de5c8ade8f9deb3164c87a364000acf/jetified-mobilertc/AndroidManifest.xml" />
+      <root url="jar://$PROJECT_DIR$/mobilertc/build/.transforms/3de5c8ade8f9deb3164c87a364000acf/jetified-mobilertc/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/mobilertc/build/.transforms/3de5c8ade8f9deb3164c87a364000acf/jetified-mobilertc/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
