@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Zigzok.iml" filepath="$PROJECT_DIR$/.idea/modules/Zigzok.iml" group="Zigzok" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="Zigzok/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/commonlib/commonlib.iml" filepath="$PROJECT_DIR$/.idea/modules/commonlib/commonlib.iml" group="Zigzok/commonlib" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mobilertc/mobilertc.iml" filepath="$PROJECT_DIR$/.idea/modules/mobilertc/mobilertc.iml" group="Zigzok/mobilertc" />
+    </modules>
+  </component>
+</project>
