@@ -37,7 +37,7 @@
             android:src="@drawable/create_room_img"
             android:layout_columnWeight="1"
             android:background="@drawable/create_room"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="10dp"
             />
 
         <ImageButton
@@ -47,7 +47,7 @@
             android:src="@drawable/join_img"
             android:layout_columnWeight="1"
             android:background="@drawable/join"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="10dp"
             />
 
         <ImageButton

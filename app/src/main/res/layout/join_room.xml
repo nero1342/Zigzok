@@ -1,37 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="#62def8"
-    android:orientation="vertical"
+    android:layout_width="321dp"
+    android:layout_height="360dp"
+    android:background="#fcc608"
     >
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:textSize="22sp"
-        android:text="Create room"/>
-
-
-    <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Room ID"
-        android:id="@+id/txtRoomID"
-        />
-    <EditText
+        android:layout_marginBottom="20sp"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center_horizontal"
+        android:paddingLeft="30sp"
+        android:paddingTop="60sp"
+        android:paddingRight="30sp"
+        android:text="Join Room"
+        android:textColor="#000000"
+        android:textSize="40sp" />
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username"
-        android:id="@+id/txtUsername"
-        />
+        android:layout_centerInParent="true"
+        android:layout_marginEnd="50sp"
+        android:id="@+id/groupEdtText">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Room ID"
+            android:layout_marginTop="20sp"
+            android:paddingBottom="20sp"
+            android:id="@+id/txtRoomID"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username"
+            android:paddingBottom="20sp"
+            android:layout_below="@id/txtRoomID"
+            android:id="@+id/txtUsername"
+            />
+
+    </RelativeLayout>
+
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Join"
-        android:layout_gravity="center"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/groupEdtText"
+        android:layout_marginTop="20sp"
         android:id="@+id/btnJoinRoomFinal"
+        android:background="#2295ff"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
         />
-</LinearLayout>
+</RelativeLayout>

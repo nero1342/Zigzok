@@ -118,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             @Override
             public void onClick(View view) {
                 // create the popup window
-                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                int width = (int) pxToDp(321);
+                int height = (int) pxToDp(360);
                 boolean focusable = true; // lets taps outside the popup also dismiss it
                 final PopupWindow popupWindow = new PopupWindow(_viewSettings, width, height, focusable);
                 // show the popup window
@@ -135,8 +135,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             @Override
             public void onClick(View view) {
                 // create the popup window
-                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                int width = (int) pxToDp(321);
+                int height = (int) pxToDp(360);
                 boolean focusable = true; // lets taps outside the popup also dismiss it
                 final PopupWindow popupWindow = new PopupWindow(_viewJoinRoom, width, height, focusable);
                 // show the popup window
@@ -156,6 +156,9 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         });
     }
 
+    private double pxToDp(int px) {
+        return px * getResources().getDisplayMetrics().density;
+    }
 
     private void initCreateRoom() {
         _viewCreateRoom = LayoutInflater.from(this).inflate(R.layout.create_room, null);
@@ -163,8 +166,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             @Override
             public void onClick(View view) {
                 // create the popup window
-                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                int width = (int) pxToDp(321);
+                int height = (int) pxToDp(360);
                 boolean focusable = true; // lets taps outside the popup also dismiss it
                 final PopupWindow popupWindow = new PopupWindow(_viewCreateRoom, width, height, focusable);
                 // show the popup window
