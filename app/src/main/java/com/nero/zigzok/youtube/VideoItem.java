@@ -1,7 +1,9 @@
 package com.nero.zigzok.youtube;
 
+import java.io.Serializable;
+
 //Bean class for a single video item
-public class VideoItem {
+public class VideoItem implements Serializable {
 
     //stores id of a video
     private String id;

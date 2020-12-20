@@ -11,12 +11,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.nero.zigzok.MainActivity;
 import com.nero.zigzok.R;
+import com.nero.zigzok.youtube.VideoItem;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyMeetingActivity extends MeetingActivity {
 
@@ -25,7 +31,11 @@ public class MyMeetingActivity extends MeetingActivity {
 	private Button btnSwitchToNextCamera;
 	private Button btnAudio;
 	private Button btnParticipants;
-	
+
+	private TextView _txtRoomId;
+	private TextView _txtPassword;
+
+	private List<VideoItem> _lstVideoInQueue = new ArrayList<>();
 	@Override
 	protected int getLayout() {
 		return R.layout.my_meeting_layout;
@@ -90,12 +100,38 @@ public class MyMeetingActivity extends MeetingActivity {
 			}
 		});
 
-		
-		initMusicSearching();
+		initRoomInfo();
+
+		initSongSearching();
+		initSongQueue();
 	}
 
-	private void initMusicSearching() {
-		Button btnSearch = (Button) findViewById(R.id.btnSearchMusic);
+	private void initSongQueue() {
+		Button btnQueue = (Button) findViewById(R.id.btnQueueSong);
+		btnQueue.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MyMeetingActivity.this, com.nero.zigzok.youtube.QueueSong.class);
+				intent.putExtra("Queue", (Serializable) _lstVideoInQueue);
+				startActivity(intent);
+			}
+		});
+	}
+
+	private void initRoomInfo() {
+		_txtRoomId = (TextView)findViewById(R.id.txtRoomID);
+		_txtPassword = (TextView)findViewById(R.id.txtPassword);
+		MeetingInfo meetingInfo = MeetingInfo.getInstance();
+		String roomId = meetingInfo.getMeetingId();
+		String password = meetingInfo.getPassword();
+
+		_txtRoomId.setText(roomId);
+		_txtPassword.setText(password);
+	}
+
+	// 4PJ3Ye
+	private void initSongSearching() {
+		Button btnSearch = (Button) findViewById(R.id.btnSearchSong);
 		btnSearch.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -109,8 +145,9 @@ public class MyMeetingActivity extends MeetingActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == REQUEST_CODE_SEARCH_MUSIC) {
 			if (resultCode == Activity.RESULT_OK) {
-				String name = data.getStringExtra("name");
-				Toast.makeText(this, name, Toast.LENGTH_LONG).show();
+				VideoItem video = (VideoItem) data.getSerializableExtra("VIDEO_INFO");
+				_lstVideoInQueue.add(video);
+				Toast.makeText(this, video.getTitle(), Toast.LENGTH_LONG).show();
 			}
 			else {
 				Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
