@@ -108,20 +108,20 @@
         android:orientation="horizontal" >
         
         <Button
-            android:id="@+id/btnSearchMusic"
+            android:id="@+id/btnSearchSong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginRight="10dp"
-            android:text="Youtube" />
+            android:text="SEARCH SONG" />
         
         <Button
-            android:id="@+id/btnSomething"
+            android:id="@+id/btnQueueSong"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginRight="10dp"
-            android:text="Something" />
+            android:text="SHOW QUEUE" />
         
         <Button
             android:id="@+id/btnLeaveZoomMeeting"

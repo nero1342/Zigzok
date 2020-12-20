@@ -36,6 +36,12 @@
             android:hardwareAccelerated="false"
             android:theme="@style/AppFullScreenTheme"
             android:screenOrientation="portrait" />
+        <activity
+            android:name="com.nero.zigzok.youtube.QueueSong"
+            android:configChanges="orientation|screenSize"
+            android:hardwareAccelerated="false"
+            android:theme="@style/AppFullScreenTheme"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

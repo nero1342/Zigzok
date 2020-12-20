@@ -254,7 +254,10 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
         super.onDestroy();
     }
-    private void joinRoom(String roomID, String username) {
+    private void joinRoom(String roomId, String username) {
+        MeetingInfo meetingInfo = MeetingInfo.getInstance();
+        meetingInfo.setMeetingId(roomId);
+        meetingInfo.setPassword("??????");
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
 
         if(!zoomSDK.isInitialized()) {
@@ -262,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             return;
         }
 
-        if(roomID == null) {
+        if(roomId == null) {
             Toast.makeText(this, "roomID can not be NULL", Toast.LENGTH_LONG).show();
             return;
         }
@@ -276,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         opts.no_invite = true;
         opts.no_video = true;
         JoinMeetingParams params = new JoinMeetingParams();
-        params.meetingNo = roomID;
+        params.meetingNo = roomId;
         params.displayName = username;
 
         int ret = meetingService.joinMeetingWithParams(getApplicationContext(), params, opts);

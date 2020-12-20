@@ -28,9 +28,9 @@ public class MainActivity extends Activity {
     //EditText for input search keywords
     private EditText searchInput;
 
-    //YoutubeAdapter class that serves as a adapter for filling the
+    //VideoItemAdapter class that serves as a adapter for filling the
     //RecyclerView by the CardView (video_item.xml) that is created in layout folder
-    private YoutubeAdapter youtubeAdapter;
+    private VideoItemAdapter videoItemAdapter;
 
     //RecyclerView manages a long list by recycling the portion of view
     //that is currently visible on screen
@@ -85,8 +85,8 @@ public class MainActivity extends Activity {
         item.setDescription("None");
         item.setTitle("None");
         searchResults.add(item);
-        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults, MainActivity.this);
-        mRecyclerView.setAdapter(youtubeAdapter);
+        videoItemAdapter = new VideoItemAdapter(getApplicationContext(),searchResults, MainActivity.this, "search");
+        mRecyclerView.setAdapter(videoItemAdapter);
 
 
 
@@ -172,13 +172,13 @@ public class MainActivity extends Activity {
     //method for creating adapter and setting it to recycler view
     private void fillYoutubeVideos(){
 
-        //object of YoutubeAdapter which will fill the RecyclerView
-        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults, MainActivity.this);
+        //object of VideoItemAdapter which will fill the RecyclerView
+        videoItemAdapter = new VideoItemAdapter(getApplicationContext(),searchResults, MainActivity.this, "search");
 
         //setAdapter to RecyclerView
-        mRecyclerView.setAdapter(youtubeAdapter);
+        mRecyclerView.setAdapter(videoItemAdapter);
 
         //notify the Adapter that the data has been downloaded so that list can be updapted
-        youtubeAdapter.notifyDataSetChanged();
+        videoItemAdapter.notifyDataSetChanged();
     }
 }

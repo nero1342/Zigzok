@@ -20,6 +20,10 @@ import com.nero.zigzok.MainActivity;
 import com.nero.zigzok.R;
 import com.nero.zigzok.youtube.VideoItem;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MyMeetingActivity extends MeetingActivity {
 
 	private static final int REQUEST_CODE_SEARCH_MUSIC = 0x3939;
@@ -31,6 +35,7 @@ public class MyMeetingActivity extends MeetingActivity {
 	private TextView _txtRoomId;
 	private TextView _txtPassword;
 
+	private List<VideoItem> _lstVideoInQueue = new ArrayList<>();
 	@Override
 	protected int getLayout() {
 		return R.layout.my_meeting_layout;
@@ -97,7 +102,20 @@ public class MyMeetingActivity extends MeetingActivity {
 
 		initRoomInfo();
 
-		initMusicSearching();
+		initSongSearching();
+		initSongQueue();
+	}
+
+	private void initSongQueue() {
+		Button btnQueue = (Button) findViewById(R.id.btnQueueSong);
+		btnQueue.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MyMeetingActivity.this, com.nero.zigzok.youtube.QueueSong.class);
+				intent.putExtra("Queue", (Serializable) _lstVideoInQueue);
+				startActivity(intent);
+			}
+		});
 	}
 
 	private void initRoomInfo() {
@@ -112,8 +130,8 @@ public class MyMeetingActivity extends MeetingActivity {
 	}
 
 	// 4PJ3Ye
-	private void initMusicSearching() {
-		Button btnSearch = (Button) findViewById(R.id.btnSearchMusic);
+	private void initSongSearching() {
+		Button btnSearch = (Button) findViewById(R.id.btnSearchSong);
 		btnSearch.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -128,6 +146,7 @@ public class MyMeetingActivity extends MeetingActivity {
 		if (requestCode == REQUEST_CODE_SEARCH_MUSIC) {
 			if (resultCode == Activity.RESULT_OK) {
 				VideoItem video = (VideoItem) data.getSerializableExtra("VIDEO_INFO");
+				_lstVideoInQueue.add(video);
 				Toast.makeText(this, video.getTitle(), Toast.LENGTH_LONG).show();
 			}
 			else {
