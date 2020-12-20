@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import android.app.Activity;
 import com.nero.zigzok.R;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     //EditText for input search keywords
     private EditText searchInput;
 
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         item.setDescription("None");
         item.setTitle("None");
         searchResults.add(item);
-        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults);
+        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults, MainActivity.this);
         mRecyclerView.setAdapter(youtubeAdapter);
 
 
@@ -133,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
 
     //custom search method which takes argument as the keyword for which videos is to be searched
     private void searchOnYoutube(final String keywords){
-
         //A thread that will execute the searching and inflating the RecyclerView as and when
         //results are found
         new Thread(){
@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     private void fillYoutubeVideos(){
 
         //object of YoutubeAdapter which will fill the RecyclerView
-        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults);
+        youtubeAdapter = new YoutubeAdapter(getApplicationContext(),searchResults, MainActivity.this);
 
         //setAdapter to RecyclerView
         mRecyclerView.setAdapter(youtubeAdapter);

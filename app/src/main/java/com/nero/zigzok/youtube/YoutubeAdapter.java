@@ -10,15 +10,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
+import android.app.Activity;
 
 import com.nero.zigzok.R;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.List;
 
 //Adapter class for RecyclerView of videos
 public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHolder> {
-
+    private Activity mActivity;
     private Context mContext;
     private List<VideoItem> mVideoList;
 
@@ -47,9 +49,10 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
 
     //Parameterised Constructor to save the Activity context and video list
     //helps in initializing a oject for this class
-    public YoutubeAdapter(Context mContext, List<VideoItem> mVideoList) {
+    public YoutubeAdapter(Context mContext, List<VideoItem> mVideoList, Activity mActivity) {
         this.mContext = mContext;
         this.mVideoList = mVideoList;
+        this.mActivity = mActivity;
     }
 
     // Create new views (invoked by the layout manager)
@@ -104,26 +107,33 @@ public class YoutubeAdapter extends RecyclerView.Adapter<YoutubeAdapter.MyViewHo
             //onClick method called when the view is clicked
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent();
+                intent.putExtra("VIDEO_INFO", (Serializable) singleVideo);
+//                intent.putExtra("VIDEO_ID", singleVideo.getId());
+//                intent.putExtra("VIDEO_TITLE",singleVideo.getTitle());
+//                intent.putExtra("VIDEO_DESC",singleVideo.getDescription());
+                mActivity.setResult(Activity.RESULT_OK, intent);
+                mActivity.finish();
                 //creating a intent for PlayerActivity class from this Activity
                 //arguments needed are package context and the new Activity class
-                Intent intent = new Intent(mContext, PlayerActivity.class);
+//                Intent intent = new Intent(mContext, PlayerActivity.class);
+//
+//                //putExtra method helps to add extra/extended data to the intent
+//                //which can then be used by the new activity to get initial data from older activity
+//                //arguments is a name used to identify the data and other is the data itself
+//                intent.putExtra("VIDEO_ID", singleVideo.getId());
+//                intent.putExtra("VIDEO_TITLE",singleVideo.getTitle());
+//                intent.putExtra("VIDEO_DESC",singleVideo.getDescription());
+//
+//                //Flags define hot the activity should behave when launched
+//                //FLAG_ACTIVITY_NEW_TASK flag if set, the activity will become the start of a new task on this history stack.
+//                //adding flag as it is required for YoutubePlayerView Activity
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//                //launching the activity by startActivity method
+//                //use mContext as this class is not the original context
+//                mContext.startActivity(intent);
 
-                //putExtra method helps to add extra/extended data to the intent
-                //which can then be used by the new activity to get initial data from older activity
-                //arguments is a name used to identify the data and other is the data itself
-                intent.putExtra("VIDEO_ID", singleVideo.getId());
-                intent.putExtra("VIDEO_TITLE",singleVideo.getTitle());
-                intent.putExtra("VIDEO_DESC",singleVideo.getDescription());
-
-                //Flags define hot the activity should behave when launched
-                //FLAG_ACTIVITY_NEW_TASK flag if set, the activity will become the start of a new task on this history stack.
-                //adding flag as it is required for YoutubePlayerView Activity
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                //launching the activity by startActivity method
-                //use mContext as this class is not the original context
-                mContext.startActivity(intent);
             }
         });
     }

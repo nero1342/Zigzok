@@ -17,8 +17,11 @@ import us.zoom.sdk.ZoomSDKInitializeListener;
 import us.zoom.sdk.ZoomSDKRawDataMemoryMode;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +37,21 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.nero.zigzok.room.MeetingInfo;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 
 import static com.nero.zigzok.room.Constants.MEETING_ID;
 import static com.nero.zigzok.room.Constants.MEETING_PASSWORD;
@@ -69,7 +87,9 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     private Button _btnJoinRoomFinal;
     private Button _btnCreateRoomFinal;
+    private ProgressDialog _progressDialog;
 
+    MutableLiveData<String> _responseCreateRoom = new MutableLiveData<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         }
 
         initComponents();
+        _progressDialog = new ProgressDialog(this);
     }
 
     private void initComponents() {
@@ -263,8 +284,48 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         Log.i(TAG, "onClickBtnStartMeeting, ret=" + ret);
     }
 
-    public void createRoom(String username) {
-        String roomId = MEETING_ID;
+    public void createRoom(final String username) {
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody body = RequestBody.create(mediaType, "{}");
+        Request request = new Request.Builder()
+                .url("https://api.zoom.us/v2/users/nero18@apcs.vn/meetings")
+                .post(body)
+                .addHeader("content-type", "application/json")
+                .addHeader("authorization", "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Ilk1WTdUZlJvUVZPaElhYnQ0aG9zS3ciLCJleHAiOjE3NjYyMjk5MDAsImlhdCI6MTYwODQ1ODEyNX0.zSvQLIN0w-9PMjufhPRSLfmAO7r2fBBsWkZZUCKcrEA")
+                .build();
+
+        _progressDialog.setTitle("Creating room...");
+        _progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        _progressDialog.setMessage("Wait a few seconds...");
+        _progressDialog.show();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.i("Error","Failed to connect: "+e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                // Log.d(TAG, response.body().string());
+                String x = response.body().string();
+                try {
+                    JSONObject json = new JSONObject(x);
+                    String roomID = json.getString("id");
+                    String password = json.getString("password");
+                    createRoom(username, roomID, password);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                _progressDialog.dismiss();
+            }
+        });
+    }
+    public void createRoom(String username, String roomId, String password) {
+        MeetingInfo meetingInfo = MeetingInfo.getInstance();
+        meetingInfo.setMeetingId(roomId);
+        meetingInfo.setPassword(password);
 
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
 
@@ -286,13 +347,15 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         opts.no_bottom_toolbar = true;
         opts.no_invite = true;
         opts.no_video = true;
-        JoinMeetingParams params = new JoinMeetingParams();
+
+        StartMeetingParamsWithoutLogin  params = new StartMeetingParamsWithoutLogin ();
+        params.userId = USER_ID;
+        params.userType = 1;
         params.meetingNo = roomId;
         params.displayName = username;
-        params.password = MEETING_PASSWORD;
-
-        int ret = meetingService.joinMeetingWithParams(getApplicationContext(), params, opts);
-        Log.i(TAG, "onClickBtnStartMeeting, ret=" + ret);
+        params.zoomAccessToken = ZOOM_ACCESS_TOKEN;
+        int ret = meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
+        Log.i(TAG, "create room, ret=" + ret);
     }
 
     @Override
