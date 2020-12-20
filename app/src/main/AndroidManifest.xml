@@ -16,7 +16,7 @@
             android:icon="@drawable/ic_launcher"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
+            android:theme="@style/AppFullScreenTheme"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,13 +28,13 @@
             android:name="com.nero.zigzok.room.MyMeetingActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="false"
-            android:theme="@style/AppTheme"
+            android:theme="@style/AppFullScreenTheme"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.nero.zigzok.youtube.MainActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="false"
-            android:theme="@style/AppTheme"
+            android:theme="@style/AppFullScreenTheme"
             android:screenOrientation="portrait" />
     </application>
 
