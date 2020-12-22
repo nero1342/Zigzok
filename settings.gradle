@@ -1,4 +1,4 @@
 include ':mobilertc'
 include ':commonlib'
 include ':app'
-rootProject.name = "Zigzok"
+rootProject.name = "Zikzok"

@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.1"
 
     defaultConfig {
-        applicationId "com.nero.zigzok"
+        applicationId "com.nero.zikzok"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
@@ -49,5 +50,9 @@ dependencies {
     implementation 'pub.devrel:easypermissions:0.3.0'
 
     implementation 'com.squareup.okhttp:okhttp:2.5.0'
+
+    implementation platform('com.google.firebase:firebase-bom:26.2.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-database'
 
 }
