@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="zm_config_conf_activity">com.nero.zigzok.room.MyMeetingActivity</string>
+    <string name="zm_config_conf_activity">com.nero.zikzok.room.MyMeetingActivity</string>
 
 </resources>

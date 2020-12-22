@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "412970629894",
+    "project_id": "zikzok-decc8",
+    "storage_bucket": "zikzok-decc8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:412970629894:android:c38f41b80f558bfc6cfc87",
+        "android_client_info": {
+          "package_name": "com.nero.zikzok"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "412970629894-8dd523c19e02mblus0kdoimnr0qmh89i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nero.zikzok",
+            "certificate_hash": "cc78b66a921c14a8697247bf28d7ceb203d07be0"
+          }
+        },
+        {
+          "client_id": "412970629894-i85r584dtuna47563a30dj9pf8h24krp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArIYxElbLfZnk1yeUavAoka26WZ17iFZE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "412970629894-i85r584dtuna47563a30dj9pf8h24krp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
