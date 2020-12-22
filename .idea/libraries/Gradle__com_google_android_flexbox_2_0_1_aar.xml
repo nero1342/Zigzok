@@ -4,7 +4,6 @@
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6f2091a7c3630dcca6080532d39f0dee/jetified-flexbox-2.0.1/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6f2091a7c3630dcca6080532d39f0dee/jetified-flexbox-2.0.1/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6f2091a7c3630dcca6080532d39f0dee/jetified-flexbox-2.0.1/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6f2091a7c3630dcca6080532d39f0dee/jetified-flexbox-2.0.1/res" />
     </CLASSES>

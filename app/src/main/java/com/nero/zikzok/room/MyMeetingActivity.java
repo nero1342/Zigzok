@@ -186,7 +186,11 @@ public class MyMeetingActivity extends MeetingActivity {
 		mFirebaseInstance = FirebaseDatabase.getInstance();
 
 		mFirebaseDatabase = mFirebaseInstance.getReference("room").child(roomId);
-		mFirebaseDatabase.child("password").setValue(password[0]);
+		if (password[0] != "??????")
+			mFirebaseDatabase.child("password").setValue(password[0]);
+		else {
+
+		}
 		mQueueDatabase = mFirebaseDatabase.child("queue");
 		mQueueDatabase.addValueEventListener(new ValueEventListener() {
 			@Override

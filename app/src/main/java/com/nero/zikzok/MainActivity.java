@@ -64,7 +64,7 @@ import static com.nero.zikzok.room.Constants.ZOOM_ACCESS_TOKEN;
 
 public class MainActivity extends AppCompatActivity implements MeetingServiceListener, ZoomSDKInitializeListener {
 
-    private final static String TAG = "Zigzok";
+    private final static String TAG = "Zikzok";
 
     public final static String ACTION_RETURN_FROM_MEETING = "us.zoom.sdkexample2.action.ReturnFromMeeting";
     public final static String EXTRA_TAB_ID = "tabId";
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     public final static int TAB_SETTING  = 3;
 
     private final static int STYPE = MeetingService.USER_TYPE_API_USER;
-    private final static String DISPLAY_NAME = "Zigzok";
+    private final static String DISPLAY_NAME = "Zikzok";
 
     private View _viewHome;
     private View _viewCreateRoom;
