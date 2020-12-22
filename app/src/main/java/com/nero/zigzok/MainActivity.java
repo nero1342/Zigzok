@@ -53,6 +53,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
+import static com.nero.zigzok.room.Constants.JWT_TOKEN;
 import static com.nero.zigzok.room.Constants.MEETING_ID;
 import static com.nero.zigzok.room.Constants.MEETING_PASSWORD;
 import static com.nero.zigzok.room.Constants.SDK_KEY;
@@ -113,8 +114,42 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             registerMeetingServiceListener();
         }
 
+        initZoomAccessToken();
+
         initComponents();
         _progressDialog = new ProgressDialog(this);
+    }
+
+    private void initZoomAccessToken() {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://api.zoom.us/v2/users/"+USER_ID+"/token?type=zak")
+                .get()
+                .addHeader("authorization", "Bearer "+ JWT_TOKEN)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.i("Error","Failed to connect: "+e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                // Log.d(TAG, response.body().string());
+                String x = response.body().string();
+                try {
+                    JSONObject json = new JSONObject(x);
+                    String zak = json.getString("token");
+                    MeetingInfo meetingInfo = MeetingInfo.getInstance();
+                    meetingInfo.setZak(zak);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void initComponents() {
@@ -122,10 +157,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         _btnCreateRoom = (ImageButton) findViewById(R.id.btnCreateRoom);
         _btnJoinRoom = (ImageButton) findViewById(R.id.btnJoinRoom);
         _btnSettings = (ImageButton) findViewById(R.id.btnSettings);
-
-//        _btnCreateRoom.setOnClickListener(helper(R.layout.create_room));
-//
-//        _btnSettings.setOnClickListener(helper(R.layout.settings));
 
         initCreateRoom();
         initJoinRoom();
@@ -337,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             return;
         }
 
-        if(MEETING_ID == null) {
+        if(roomId == null) {
             Toast.makeText(this, "MEETING_ID in Constants can not be NULL", Toast.LENGTH_LONG).show();
             return;
         }
@@ -356,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         params.userType = 1;
         params.meetingNo = roomId;
         params.displayName = username;
-        params.zoomAccessToken = ZOOM_ACCESS_TOKEN;
+        params.zoomAccessToken = MeetingInfo.getInstance().getZak();
         int ret = meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
         Log.i(TAG, "create room, ret=" + ret);
     }
