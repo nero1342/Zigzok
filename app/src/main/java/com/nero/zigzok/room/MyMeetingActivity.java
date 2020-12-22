@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
@@ -19,10 +20,20 @@ import androidx.annotation.Nullable;
 import com.nero.zigzok.MainActivity;
 import com.nero.zigzok.R;
 import com.nero.zigzok.youtube.VideoItem;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.nero.zigzok.room.Constants.JWT_TOKEN;
 
 public class MyMeetingActivity extends MeetingActivity {
 
@@ -123,10 +134,38 @@ public class MyMeetingActivity extends MeetingActivity {
 		_txtPassword = (TextView)findViewById(R.id.txtPassword);
 		MeetingInfo meetingInfo = MeetingInfo.getInstance();
 		String roomId = meetingInfo.getMeetingId();
-		String password = meetingInfo.getPassword();
+		final String[] password = {meetingInfo.getPassword()};
 
+		if (password[0] == "??????") {
+			OkHttpClient client = new OkHttpClient();
+			Request request = new Request.Builder()
+					.url("https://api.zoom.us/v2/meetings/"+roomId)
+					.get()
+					.addHeader("authorization", "Bearer "+ JWT_TOKEN)
+					.build();
+			client.newCall(request).enqueue(new Callback() {
+				@Override
+				public void onFailure(Request request, IOException e) {
+					Log.i("Error","Failed to connect: "+e.getMessage());
+				}
+
+				@Override
+				public void onResponse(Response response) throws IOException {
+					// Log.d(TAG, response.body().string());
+					String x = response.body().string();
+					try {
+						JSONObject json = new JSONObject(x);
+						password[0] = json.getString("password");
+						_txtPassword.setText(password[0]);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+
+				}
+			});
+		}
 		_txtRoomId.setText(roomId);
-		_txtPassword.setText(password);
+		_txtPassword.setText(password[0]);
 	}
 
 	// 4PJ3Ye

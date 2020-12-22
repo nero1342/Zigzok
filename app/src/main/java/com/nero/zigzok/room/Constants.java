@@ -15,6 +15,8 @@ public interface Constants {
     String MEETING_ID = "6308912138";
 
     String MEETING_PASSWORD = "789656";
+
+    public  final static String JWT_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6Ilk1WTdUZlJvUVZPaElhYnQ0aG9zS3ciLCJleHAiOjE3NjYyMjk5MDAsImlhdCI6MTYwODQ1ODEyNX0.zSvQLIN0w-9PMjufhPRSLfmAO7r2fBBsWkZZUCKcrEA";
     /**
      * We recommend that, you can generate jwttoken on your own server instead of hardcore in the code.
      * We hardcore it here, just to run the demo.

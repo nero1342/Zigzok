@@ -19,7 +19,7 @@ public class MeetingInfo {
 
     private String meetingId;
     private String password;
-
+    private String zak;
 
     public String getMeetingId() {
         return meetingId;
@@ -35,5 +35,13 @@ public class MeetingInfo {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getZak() {
+        return zak;
+    }
+
+    public void setZak(String zak) {
+        this.zak = zak;
     }
 }
