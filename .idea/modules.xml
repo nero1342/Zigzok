@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CS300-Zikzok.iml" filepath="$PROJECT_DIR$/.idea/modules/CS300-Zikzok.iml" group="Zikzok" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Projects-Zikzok.iml" filepath="$PROJECT_DIR$/.idea/modules/Projects-Zikzok.iml" group="Zikzok" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Zikzok.iml" filepath="$PROJECT_DIR$/.idea/modules/Zikzok.iml" group="Zikzok" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="Zikzok/app" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/commonlib/commonlib.iml" filepath="$PROJECT_DIR$/.idea/modules/commonlib/commonlib.iml" group="Zikzok/commonlib" />

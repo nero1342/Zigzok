@@ -19,6 +19,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -50,6 +54,7 @@ public class MyMeetingActivity extends MeetingActivity {
 	private Button btnSwitchToNextCamera;
 	private Button btnAudio;
 	private Button btnParticipants;
+	private Button btnPlay;
 
 	private TextView _txtRoomId;
 	private TextView _txtPassword;
@@ -125,11 +130,29 @@ public class MyMeetingActivity extends MeetingActivity {
 		});
 
 		initRoomInfo();
-
 		initSongSearching();
 		initSongQueue();
 
+		btnPlay = findViewById(R.id.btnPlay);
+		btnPlay.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				final VideoItem topSong = _lstVideoInQueue.get(0);
+				YouTubePlayerFragment youTubePlayerFragment =
+						(YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
+				youTubePlayerFragment.initialize("AIzaSyDk4ptR6D-ugBV3kOCykaSAkY9KkMifzcg", new YouTubePlayer.OnInitializedListener() {
+					@Override
+					public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+						youTubePlayer.loadVideo(topSong.getId());
+					}
 
+					@Override
+					public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+
+					}
+				});
+			}
+		});
 	}
 
 	private void initSongQueue() {
@@ -240,7 +263,7 @@ public class MyMeetingActivity extends MeetingActivity {
 
 	private void addSongToQueue(VideoItem video) {
 		_lstVideoInQueue.add(video);
-		mQueueDatabase.setValue(_lstVideoInQueue);
+//		mQueueDatabase.setValue(_lstVideoInQueue);
 	}
 
 	@Override

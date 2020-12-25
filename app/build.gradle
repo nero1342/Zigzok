@@ -55,4 +55,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-database'
 
+    implementation 'com.neovisionaries:nv-websocket-client:2.10'
 }
