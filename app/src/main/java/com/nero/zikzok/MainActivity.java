@@ -22,7 +22,9 @@ import androidx.lifecycle.Observer;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -68,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     public final static String ACTION_RETURN_FROM_MEETING = "us.zoom.sdkexample2.action.ReturnFromMeeting";
     public final static String EXTRA_TAB_ID = "tabId";
+    private final static String LAST_ROOM_ID_KEY = "LAST_ROOM_ID";
+    private final static String LAST_USERNAME_KEY = "LAST_USERNAME";
 
     public final static int TAB_HOME = 1;
     public final static int TAB_CREATEROOM = 2;
@@ -118,9 +122,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
         initComponents();
         _progressDialog = new ProgressDialog(this);
-
-
-
     }
 
     private void initZoomAccessToken() {
@@ -185,7 +186,10 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     }
 
     private void initJoinRoom() {
+        final SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
         _viewJoinRoom = LayoutInflater.from(this).inflate(R.layout.join_room, null);
+        ((EditText) _viewJoinRoom.findViewById(R.id.txtRoomID)).setText(sharedPreferences.getString(LAST_ROOM_ID_KEY, ""));
+        ((EditText) _viewJoinRoom.findViewById(R.id.txtUsername)).setText(sharedPreferences.getString(LAST_USERNAME_KEY, ""));
         _btnJoinRoom.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -204,8 +208,12 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         _btnJoinRoomFinal.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String _username = String.valueOf(((EditText)_viewJoinRoom.findViewById(R.id.txtUsername)).getText());
                 String _roomID = String.valueOf(((EditText)_viewJoinRoom.findViewById(R.id.txtRoomID)).getText());
+                String _username = String.valueOf(((EditText)_viewJoinRoom.findViewById(R.id.txtUsername)).getText());
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(LAST_ROOM_ID_KEY, _roomID);
+                editor.putString(LAST_USERNAME_KEY, _username);
+                editor.commit();
                 joinRoom(_roomID, _username);
             }
         });
@@ -291,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     private void joinRoom(String roomId, String username) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
-        meetingInfo.setPassword("??????");
+        meetingInfo.setPassword("6M6k56");
         ZoomSDK zoomSDK = ZoomSDK.getInstance();
 
         if(!zoomSDK.isInitialized()) {

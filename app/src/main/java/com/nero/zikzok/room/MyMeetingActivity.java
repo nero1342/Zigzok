@@ -19,10 +19,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.google.android.youtube.player.YouTubePlayerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -61,6 +65,8 @@ public class MyMeetingActivity extends MeetingActivity {
 	private TextView _txtPassword;
 
 	private List<VideoItem> _lstVideoInQueue = new ArrayList<>();
+
+	YouTubePlayer youtubePlayer;
 
 	FirebaseDatabase mFirebaseInstance;
 	DatabaseReference mFirebaseDatabase;
@@ -133,25 +139,20 @@ public class MyMeetingActivity extends MeetingActivity {
 		initRoomInfo();
 		initSongSearching();
 		initSongQueue();
+		initYoutube();
 
+		// for testing purposes
 		btnPlay = findViewById(R.id.btnPlay);
 		btnPlay.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				final VideoItem topSong = _lstVideoInQueue.get(0);
-				YouTubePlayerFragment youTubePlayerFragment =
-						(YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
-				youTubePlayerFragment.initialize("AIzaSyDk4ptR6D-ugBV3kOCykaSAkY9KkMifzcg", new YouTubePlayer.OnInitializedListener() {
-					@Override
-					public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
-						youTubePlayer.loadVideo(topSong.getId());
-					}
-
-					@Override
-					public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-
-					}
-				});
+				VideoItem vi = new VideoItem();
+				vi.setId("5ivMeA5peBQ");
+				vi.setDescription("Mac Ke Anh - description");
+				vi.setThumbnailURL("http://i3.ytimg.com/vi/5ivMeA5peBQ/hqdefault.jpg");
+				vi.setTitle("Mac Ke Anh");
+				_lstVideoInQueue.add(vi);
+				youtubePlayer.loadVideo(vi.getId());
 			}
 		});
 	}
@@ -175,35 +176,38 @@ public class MyMeetingActivity extends MeetingActivity {
 		String roomId = meetingInfo.getMeetingId();
 		final String[] password = {meetingInfo.getPassword()};
 
-		if (password[0] == "??????") {
-			OkHttpClient client = new OkHttpClient();
-			Request request = new Request.Builder()
-					.url("https://api.zoom.us/v2/meetings/"+roomId)
-					.get()
-					.addHeader("authorization", "Bearer "+ JWT_TOKEN)
-					.build();
-			client.newCall(request).enqueue(new Callback() {
-				@Override
-				public void onFailure(Request request, IOException e) {
-					Log.i("Error","Failed to connect: "+e.getMessage());
-				}
+		Log.d("[ZOOM]", "Room id = " + roomId);
+		Log.d("[ZOOM]", "Password = " + password[0]);
 
-				@Override
-				public void onResponse(Response response) throws IOException {
-					// Log.d(TAG, response.body().string());
-					String x = response.body().string();
-					try {
-						JSONObject json = new JSONObject(x);
-						password[0] = json.getString("password");
-						_txtPassword.setText(password[0]);
-						meetingInfo.setPassword(password[0]);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-
-				}
-			});
-		}
+		// fetch password for new room
+//		if (password[0] == "??????") {
+//			OkHttpClient client = new OkHttpClient();
+//			Request request = new Request.Builder()
+//					.url("https://api.zoom.us/v2/meetings/"+roomId)
+//					.get()
+//					.addHeader("authorization", "Bearer "+ JWT_TOKEN)
+//					.build();
+//			client.newCall(request).enqueue(new Callback() {
+//				@Override
+//				public void onFailure(Request request, IOException e) {
+//					Log.e("Error","Failed to connect: "+e.getMessage());
+//				}
+//
+//				@Override
+//				public void onResponse(Response response) throws IOException {
+//					String x = response.body().string();
+//					try {
+//						JSONObject json = new JSONObject(x);
+//						password[0] = json.getString("password");
+//						_txtPassword.setText(password[0]);
+//						meetingInfo.setPassword(password[0]);
+//					} catch (JSONException e) {
+//						e.printStackTrace();
+//					}
+//
+//				}
+//			});
+//		}
 		_txtRoomId.setText(roomId);
 		_txtPassword.setText(password[0]);
 
@@ -219,12 +223,18 @@ public class MyMeetingActivity extends MeetingActivity {
 		mQueueDatabase.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot snapshot) {
-				Log.e("Count " ,""+snapshot.getChildrenCount());
 				ArrayList<VideoItem> newLst = new ArrayList<>();
 				for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-            		VideoItem video = postSnapshot.getValue(VideoItem.class);
-            		newLst.add(video);
-					Log.e("Get Data", video.toString());
+            		newLst.add(postSnapshot.getValue(VideoItem.class));
+				}
+				if (_lstVideoInQueue.isEmpty() || newLst.isEmpty() || _lstVideoInQueue.get(0).getId() != newLst.get(0).getId()) {
+					if (!newLst.isEmpty())
+						youtubePlayer.loadVideo(newLst.get(0).getId());
+					else {
+						if (youtubePlayer.isPlaying())
+							youtubePlayer.seekToMillis(youtubePlayer.getDurationMillis());
+					}
+					Log.d("[FIREBASE]", "Update: new queue size is " + newLst.size());
 				}
 				_lstVideoInQueue = newLst;
 			}
@@ -247,6 +257,94 @@ public class MyMeetingActivity extends MeetingActivity {
 			}
 		});
 	}
+
+
+	private void initYoutube() {
+		YouTubePlayerFragment youTubePlayerFragment = (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
+		youTubePlayerFragment.initialize("AIzaSyDk4ptR6D-ugBV3kOCykaSAkY9KkMifzcg", new YouTubePlayer.OnInitializedListener() {
+			@Override
+			public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer player, boolean b) {
+				player.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+					@Override
+					public void onLoading() {
+
+					}
+
+					@Override
+					public void onLoaded(String s) {
+
+					}
+
+					@Override
+					public void onAdStarted() {
+
+					}
+
+					@Override
+					public void onVideoStarted() {
+
+					}
+
+					@Override
+					public void onVideoEnded() {
+						mQueueDatabase.orderByKey().limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
+							@Override
+							public void onDataChange(@NonNull DataSnapshot snapshot) {
+								for (DataSnapshot song : snapshot.getChildren()) {
+									Log.d("[FIREBASE]", "Removing " + song.getValue());
+									song.getRef().removeValue();
+								}
+							}
+
+							@Override
+							public void onCancelled(@NonNull DatabaseError error) {
+
+							}
+						});
+						Log.d("[YOUTUBE]", "Video ended");
+					}
+
+					@Override
+					public void onError(YouTubePlayer.ErrorReason errorReason) {
+
+					}
+				});
+				player.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
+					@Override
+					public void onPlaying() {
+
+					}
+
+					@Override
+					public void onPaused() {
+						player.play();
+					}
+
+					@Override
+					public void onStopped() {
+
+					}
+
+					@Override
+					public void onBuffering(boolean b) {
+
+					}
+
+					@Override
+					public void onSeekTo(int i) {
+
+					}
+				});
+				youtubePlayer = player;
+			}
+
+			@Override
+			public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+				// TODO: handle this
+			}
+		});
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -263,8 +361,8 @@ public class MyMeetingActivity extends MeetingActivity {
 	}
 
 	private void addSongToQueue(VideoItem video) {
-		_lstVideoInQueue.add(video);
-//		mQueueDatabase.setValue(_lstVideoInQueue);
+		DatabaseReference pushedVideoRef = mQueueDatabase.push();
+		pushedVideoRef.setValue(video);
 	}
 
 	@Override

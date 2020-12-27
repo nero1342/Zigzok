@@ -33,7 +33,7 @@ public class YoutubeConnector {
     //Developer API key a developer can obtain after creating a new project in google developer console
     //Developer has to enable YouTube Data API v3 in the project
     //Add credentials and then provide the Application's package name and SHA fingerprint
-    public static final String KEY = "AIzaSyDk4ptR6D-ugBV3kOCykaSAkY9KkMifzcg";
+    public static final String KEY = "AIzaSyCmII8duKxXD3IrF0GYLY_HBO7PocbNwvM";
 
     //Package name of the app that will call the YouTube Data API
     public static final String PACKAGENAME = "com.example.youtube";
@@ -42,7 +42,7 @@ public class YoutubeConnector {
     public static final String SHA1 = "CC:78:B6:6A:92:1C:14:A8:69:72:47:BF:28:D7:CE:B2:03:D0:7B:E0";
 
     //maximum results that should be downloaded via the YouTube data API at a time
-    private static final long MAXRESULTS = 25;
+    private static final long MAXRESULTS = 4;
 
     //Constructor to properly initialize Youtube's object
     public YoutubeConnector(Context context) {
