@@ -1,6 +1,7 @@
 package com.nero.zikzok.room;
 
 import us.zoom.sdk.MeetingActivity;
+import us.zoom.sdk.ZoomSDK;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -96,7 +97,7 @@ public class MyMeetingActivity extends MeetingActivity {
 
 			@Override
 			public void onClick(View v) {
-				showLeaveDialog();
+				ZoomSDK.getInstance().getMeetingService().leaveCurrentMeeting(true);
 			}
 		});
 

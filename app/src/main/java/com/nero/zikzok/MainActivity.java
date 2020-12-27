@@ -312,9 +312,11 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         opts.no_bottom_toolbar = true;
         opts.no_invite = true;
         opts.no_video = true;
+        opts.no_meeting_end_message = true;
         JoinMeetingParams params = new JoinMeetingParams();
         params.meetingNo = roomId;
         params.displayName = username;
+        params.password = "6M6k56";
 
         int ret = meetingService.joinMeetingWithParams(getApplicationContext(), params, opts);
 
