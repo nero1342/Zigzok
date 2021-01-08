@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,11 +56,11 @@ import static com.nero.zikzok.room.Constants.JWT_TOKEN;
 public class MyMeetingActivity extends MeetingActivity {
 
 	private static final int REQUEST_CODE_SEARCH_MUSIC = 0x3939;
-	private Button btnLeaveZoomMeeting;
-	private Button btnSwitchToNextCamera;
-	private Button btnAudio;
-	private Button btnParticipants;
-	private Button btnPlay;
+	private ImageButton btnLeaveZoomMeeting;
+	private ImageButton btnSwitchToNextCamera;
+	private ImageButton btnAudio;
+	private ImageButton btnParticipants;
+	private ImageButton btnPlay;
 
 	private TextView _txtRoomId;
 	private TextView _txtPassword;
@@ -94,10 +95,10 @@ public class MyMeetingActivity extends MeetingActivity {
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 //		setupTabs();
 
-		btnLeaveZoomMeeting = (Button)findViewById(R.id.btnLeaveZoomMeeting);
-		btnSwitchToNextCamera = (Button)findViewById(R.id.btnSwitchToNextCamera);
-		btnAudio = (Button)findViewById(R.id.btnAudio);
-		btnParticipants = (Button)findViewById(R.id.btnParticipants);
+		btnLeaveZoomMeeting = (ImageButton)findViewById(R.id.btnLeaveZoomMeeting);
+		btnSwitchToNextCamera = (ImageButton)findViewById(R.id.btnSwitchToNextCamera);
+		btnAudio = (ImageButton)findViewById(R.id.btnAudio);
+		btnParticipants = (ImageButton)findViewById(R.id.btnParticipants);
 
 		btnLeaveZoomMeeting.setOnClickListener(new OnClickListener() {
 
@@ -158,7 +159,7 @@ public class MyMeetingActivity extends MeetingActivity {
 	}
 
 	private void initSongQueue() {
-		Button btnQueue = (Button) findViewById(R.id.btnQueueSong);
+		ImageButton btnQueue = (ImageButton) findViewById(R.id.btnQueueSong);
 		btnQueue.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -248,7 +249,7 @@ public class MyMeetingActivity extends MeetingActivity {
 
 	// 4PJ3Ye
 	private void initSongSearching() {
-		Button btnSearch = (Button) findViewById(R.id.btnSearchSong);
+		ImageButton btnSearch = (ImageButton) findViewById(R.id.btnSearchSong);
 		btnSearch.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {

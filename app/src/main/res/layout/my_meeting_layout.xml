@@ -12,11 +12,11 @@
         android:gravity="right|center_vertical"
         android:orientation="vertical" >
         <LinearLayout
-            android:background="#8080cc"
+            android:background="#EAEE29"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
-            android:layout_weight="0.7">
+            android:layout_weight="0.5">
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -24,7 +24,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center_horizontal"
                 android:text="ROOM ID: "
-                android:textSize="30sp" />
+                android:textSize="20sp" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -33,10 +33,10 @@
                 android:gravity="center_horizontal"
                 android:text="1234567890 "
                 android:id="@+id/txtRoomID"
-                android:textSize="30sp" />
+                android:textSize="20sp" />
         </LinearLayout>
         <LinearLayout
-            android:background="#8080cc"
+            android:background="#EAEE29"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
@@ -63,30 +63,57 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="#8080cc"
+            android:background="#EAEE29"
             android:gravity="center"
             android:orientation="horizontal" >
 
-            <Button
+<!--            <Button-->
+<!--                android:id="@+id/btnAudio"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:text="Audio" />-->
+
+            <ImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/audio"
                 android:id="@+id/btnAudio"
+                android:background="#EAEE29"
+                android:layout_weight="3"
+                android:layout_marginRight="10dp"/>
+
+<!--            <Button-->
+<!--                android:id="@+id/btnSwitchToNextCamera"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:text="Camera" />-->
+
+            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
-                android:text="Audio" />
-
-            <Button
                 android:id="@+id/btnSwitchToNextCamera"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:text="Camera" />
+                android:src="@drawable/camera"
+                android:layout_weight="3"
+                android:background="#EAEE29"/>
 
-            <Button
-                android:id="@+id/btnParticipants"
+<!--            <Button-->
+<!--                android:id="@+id/btnParticipants"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:text="Participants" />-->
+
+            <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/btnParticipants"
                 android:layout_marginRight="10dp"
-                android:text="Participants" />
+                android:background="#EAEE29"
+                android:layout_weight="3"
+                android:src="@drawable/participant"/>
 
         </LinearLayout>
 
@@ -103,39 +130,73 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_gravity="top"
-        android:background="#8080ff"
+        android:layout_gravity="bottom"
+        android:gravity="center_vertical"
+        android:background="#EAEE29"
         android:orientation="horizontal" >
         
-        <Button
+<!--        <Button-->
+<!--            android:id="@+id/btnSearchSong"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:layout_marginRight="10dp"-->
+<!--            android:text="SEARCH SONG" />-->
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:id="@+id/btnSearchSong"
+            android:src="@drawable/youtube"
+            android:background="#EAEE29"/>
+        
+<!--        <Button-->
+<!--            android:id="@+id/btnQueueSong"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:layout_marginRight="10dp"-->
+<!--            android:text="SHOW QUEUE" />-->
+
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="10dp"
-            android:text="SEARCH SONG" />
-        
-        <Button
             android:id="@+id/btnQueueSong"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginRight="10dp"
-            android:text="SHOW QUEUE" />
+            android:src="@drawable/queue"
+            android:background="#EAEE29"/>
         
-        <Button
+<!--        <Button-->
+<!--            android:id="@+id/btnLeaveZoomMeeting"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginRight="10dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="Leave" />-->
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/btnLeaveZoomMeeting"
+            android:layout_weight="1"
+            android:src="@drawable/leave"
+            android:background="#EAEE29"/>
+
+<!--        <Button-->
+<!--            android:id="@+id/btnPlay"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="Play" />-->
+
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:layout_weight="1"
-            android:text="Leave" />
-        <Button
             android:id="@+id/btnPlay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Play" />
+            android:src="@drawable/playicon"
+            android:background="#EAEE29"/>
     </LinearLayout>
     <fragment
         android:id="@+id/youtubeFragment"
