@@ -4,6 +4,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFBD7"
+    android:padding="10dp"
     android:orientation="vertical" >
 
     <!-- A input text type view to enter the search keyword(s)
@@ -23,6 +25,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/search"
         android:imeOptions="actionSearch"
+        android:layout_marginBottom="10dp"
         android:inputType="text"
         android:maxLines="1" />
 
