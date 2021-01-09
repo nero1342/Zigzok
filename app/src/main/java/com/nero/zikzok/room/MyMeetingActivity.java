@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import static com.nero.zikzok.room.Constants.JWT_TOKEN;
 import static us.zoom.sdk.MeetingEndReason.END_BY_HOST;
 import static us.zoom.sdk.MeetingEndReason.END_BY_SELF;
 

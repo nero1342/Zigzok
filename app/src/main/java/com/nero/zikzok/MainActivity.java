@@ -16,6 +16,7 @@ import us.zoom.sdk.ZoomSDKInitParams;
 import us.zoom.sdk.ZoomSDKInitializeListener;
 import us.zoom.sdk.ZoomSDKRawDataMemoryMode;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -40,6 +41,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.nero.zikzok.room.MeetingInfo;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -53,21 +59,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import static com.nero.zikzok.room.Constants.JWT_TOKEN;
-import static com.nero.zikzok.room.Constants.MEETING_ID;
-import static com.nero.zikzok.room.Constants.MEETING_PASSWORD;
 import static com.nero.zikzok.room.Constants.SDK_KEY;
 import static com.nero.zikzok.room.Constants.SDK_SECRET;
-import static com.nero.zikzok.room.Constants.USER_ID;
 import static com.nero.zikzok.room.Constants.WEB_DOMAIN;
-import static com.nero.zikzok.room.Constants.ZOOM_ACCESS_TOKEN;
 import static us.zoom.sdk.MeetingService.USER_TYPE_ZOOM;
 
 public class MainActivity extends AppCompatActivity implements MeetingServiceListener, ZoomSDKInitializeListener {
 
     private final static String TAG = "Zikzok";
+
+    DatabaseReference accountReference;
+    private static String USER_ID;
+    private static String JWT_TOKEN;
 
     public final static String ACTION_RETURN_FROM_MEETING = "us.zoom.sdkexample2.action.ReturnFromMeeting";
     public final static String EXTRA_TAB_ID = "tabId";
@@ -94,9 +100,10 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     private Button _btnJoinRoomFinal;
     private Button _btnCreateRoomFinal;
 
+    FirebaseDatabase mFirebaseInstance;
+
     ZoomSDK zoomSDK;
 
-    MutableLiveData<String> _responseCreateRoom = new MutableLiveData<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,8 +125,27 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             registerMeetingServiceListener();
         }
 
-        initZoomAccessToken();
-        initComponents();
+        mFirebaseInstance = FirebaseDatabase.getInstance();
+        mFirebaseInstance.getReference("zoom/accounts").orderByChild("in_use").equalTo(false).limitToFirst(1).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                DataSnapshot result = task.getResult();
+                if (result.exists() && result.getChildrenCount() > 0) {
+                    for (DataSnapshot data : result.getChildren()) {
+                        accountReference = data.getRef();
+                        USER_ID = (String) data.child("user_id").getValue();
+                        JWT_TOKEN = (String) data.child("jwt_token").getValue();
+                        Log.d("[FIREBASE]", "User_id = " + USER_ID);
+                        Log.d("[FIREBASE]", "jwt_token = " + JWT_TOKEN);
+
+                        initZoomAccessToken();
+                        initComponents();
+                    }
+                }
+                else
+                    Toast.makeText(getApplicationContext(), "Out of Zoom account to create room", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void initZoomAccessToken() {
@@ -270,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         if(ACTION_RETURN_FROM_MEETING.equals(action)) {
 //            int tabId = intent.getIntExtra(EXTRA_TAB_ID, TAB_HOME);
 //            selectTab(tabId);
+            Log.d("[ANDROID]", "Returned from meeting");
         }
     }
 
@@ -409,7 +436,9 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         params.meetingNo = roomId;
         params.displayName = username;
         params.zoomAccessToken = MeetingInfo.getInstance().getZak();
-        meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
+        Log.d("[ZOOM]", "User ID = " + USER_ID);
+        int ret = meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
+        Log.d("[ZOOM]", "Create room ret = " + ret);
     }
 
     @Override
