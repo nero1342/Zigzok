@@ -13,7 +13,7 @@
         android:fontFamily="sans-serif-condensed"
         android:gravity="center_horizontal"
         android:paddingLeft="30sp"
-        android:paddingTop="60sp"
+        android:paddingTop="45sp"
         android:paddingRight="30sp"
         android:text="Join Room"
         android:textColor="#000000"
@@ -41,6 +41,15 @@
             android:paddingBottom="20sp"
             android:layout_below="@id/txtRoomID"
             android:id="@+id/txtUsername"
+            />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:paddingBottom="20sp"
+            android:layout_below="@id/txtUsername"
+            android:id="@+id/txtPassword"
             />
 
     </RelativeLayout>

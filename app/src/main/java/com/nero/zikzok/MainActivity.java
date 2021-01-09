@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
         final EditText _textRoomID = _viewJoinRoom.findViewById(R.id.txtRoomID);
         final EditText _textUsername = _viewJoinRoom.findViewById(R.id.txtUsername);
+        final EditText _textPassword = _viewJoinRoom.findViewById(R.id.txtPassword);
 
         _textRoomID.setText(sharedPreferences.getString(LAST_ROOM_ID_KEY, ""));
         _textUsername.setText(sharedPreferences.getString(LAST_USERNAME_KEY, ""));
@@ -213,11 +214,12 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             public void onClick(View v) {
                 String _roomID = String.valueOf(_textRoomID.getText());
                 String _username = String.valueOf(_textUsername.getText());
+                String _password = String.valueOf(_textPassword.getText());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(LAST_ROOM_ID_KEY, _roomID);
                 editor.putString(LAST_USERNAME_KEY, _username);
                 editor.apply();
-                joinRoom(_roomID, _username);
+                joinRoom(_roomID, _username, _password);
             }
         });
     }
@@ -302,10 +304,10 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         super.onDestroy();
     }
 
-    private void joinRoom(String roomId, String username) {
+    private void joinRoom(String roomId, String username, String _password) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
-        meetingInfo.setPassword("6M6k56");
+        meetingInfo.setPassword(_password);
         zoomSDK = ZoomSDK.getInstance();
 
         if(!zoomSDK.isInitialized()) {
@@ -330,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         JoinMeetingParams params = new JoinMeetingParams();
         params.meetingNo = roomId;
         params.displayName = username;
-        params.password = "6M6k56";
+        params.password = _password;
 
         int ret = meetingService.joinMeetingWithParams(getApplicationContext(), params, opts);
 
