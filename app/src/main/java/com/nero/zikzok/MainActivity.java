@@ -63,6 +63,7 @@ import static com.nero.zikzok.room.Constants.SDK_SECRET;
 import static com.nero.zikzok.room.Constants.USER_ID;
 import static com.nero.zikzok.room.Constants.WEB_DOMAIN;
 import static com.nero.zikzok.room.Constants.ZOOM_ACCESS_TOKEN;
+import static us.zoom.sdk.MeetingService.USER_TYPE_ZOOM;
 
 public class MainActivity extends AppCompatActivity implements MeetingServiceListener, ZoomSDKInitializeListener {
 
@@ -92,7 +93,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     private Button _btnJoinRoomFinal;
     private Button _btnCreateRoomFinal;
-    private ProgressDialog _progressDialog;
+
+    ZoomSDK zoomSDK;
 
     MutableLiveData<String> _responseCreateRoom = new MutableLiveData<>();
     @Override
@@ -101,9 +103,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
         setContentView(R.layout.activity_main);
 
-//        setupTabs();
-
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
+        zoomSDK = ZoomSDK.getInstance();
 
         if(savedInstanceState == null) {
             ZoomSDKInitParams initParams = new ZoomSDKInitParams();
@@ -119,9 +119,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         }
 
         initZoomAccessToken();
-
         initComponents();
-        _progressDialog = new ProgressDialog(this);
     }
 
     private void initZoomAccessToken() {
@@ -278,7 +276,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     }
 
     private void registerMeetingServiceListener() {
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
         MeetingService meetingService = zoomSDK.getMeetingService();
         if(meetingService != null) {
             meetingService.addListener(this);
@@ -287,8 +284,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     @Override
     protected void onDestroy() {
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
-
         if(zoomSDK.isInitialized()) {
             MeetingService meetingService = zoomSDK.getMeetingService();
             meetingService.removeListener(this);
@@ -296,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
         super.onDestroy();
     }
+
     private void joinRoom(String roomId, String username) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
@@ -332,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     }
 
     public void createRoom(final String username) {
+        Log.i("[ZOOM]", "Creating room");
         OkHttpClient client = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, "{}");
@@ -342,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
                 .addHeader("authorization", "Bearer " + JWT_TOKEN)
                 .build();
 
+        final ProgressDialog _progressDialog = new ProgressDialog(this);
         _progressDialog.setTitle("Creating room...");
         _progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         _progressDialog.setMessage("Wait a few seconds...");
@@ -349,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Log.i("Error","Failed to connect: "+e.getMessage());
+                Log.e("[ZOOM]", "Error: Failed to connect: " + e.getMessage());
             }
 
             @Override
@@ -369,12 +367,11 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             }
         });
     }
+
     public void createRoom(String username, String roomId, String password) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
         meetingInfo.setPassword(password);
-
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
 
         if(!zoomSDK.isInitialized()) {
             Toast.makeText(this, "ZoomSDK has not been initialized successfully", Toast.LENGTH_LONG).show();
@@ -395,14 +392,16 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         opts.no_invite = true;
         opts.no_video = true;
 
-        StartMeetingParamsWithoutLogin  params = new StartMeetingParamsWithoutLogin ();
+        StartMeetingParamsWithoutLogin params = new StartMeetingParamsWithoutLogin();
+//        params.userId = "_ghh0YajRNuV-ciJ9JciVQ";
         params.userId = USER_ID;
-        params.userType = 1;
+        params.userType = USER_TYPE_ZOOM;
         params.meetingNo = roomId;
         params.displayName = username;
         params.zoomAccessToken = MeetingInfo.getInstance().getZak();
-        int ret = meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
-        Log.i(TAG, "create room, ret=" + ret);
+        meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
+        Log.d("[ZOOM]", "User ID = " + zoomSDK.getInMeetingService().getMyUserID());
+        Log.d("[ZOOM]", "Is host: " + zoomSDK.getInMeetingService().isMeetingHost());
     }
 
     @Override

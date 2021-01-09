@@ -1,5 +1,11 @@
 package com.nero.zikzok.room;
 
+import us.zoom.sdk.FreeMeetingNeedUpgradeType;
+import us.zoom.sdk.InMeetingAudioController;
+import us.zoom.sdk.InMeetingChatMessage;
+import us.zoom.sdk.InMeetingEventHandler;
+import us.zoom.sdk.InMeetingService;
+import us.zoom.sdk.InMeetingServiceListener;
 import us.zoom.sdk.MeetingActivity;
 import us.zoom.sdk.ZoomSDK;
 
@@ -52,8 +58,10 @@ import java.util.List;
 
 
 import static com.nero.zikzok.room.Constants.JWT_TOKEN;
+import static us.zoom.sdk.MeetingEndReason.END_BY_HOST;
+import static us.zoom.sdk.MeetingEndReason.END_BY_SELF;
 
-public class MyMeetingActivity extends MeetingActivity {
+public class MyMeetingActivity extends MeetingActivity implements InMeetingServiceListener {
 
 	private static final int REQUEST_CODE_SEARCH_MUSIC = 0x3939;
 	private ImageButton btnLeaveZoomMeeting;
@@ -72,7 +80,11 @@ public class MyMeetingActivity extends MeetingActivity {
 	FirebaseDatabase mFirebaseInstance;
 	DatabaseReference mFirebaseDatabase;
 	DatabaseReference mQueueDatabase;
+
 	MeetingInfo meetingInfo;
+	ZoomSDK zoomSDK;
+	InMeetingService inMeetingService;
+
 	@Override
 	protected int getLayout() {
 		return R.layout.my_meeting_layout;
@@ -93,8 +105,34 @@ public class MyMeetingActivity extends MeetingActivity {
 		super.onCreate(savedInstanceState);
 		disableFullScreenMode();
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-//		setupTabs();
 
+		zoomSDK = ZoomSDK.getInstance();
+		inMeetingService = zoomSDK.getInMeetingService();
+		inMeetingService.addListener(this);
+
+		initButtons();
+		initRoomInfo();
+		initSongQueue();
+		initYoutube();
+		initSongSearching();
+
+		// for testing purposes
+		btnPlay = findViewById(R.id.btnPlay);
+		btnPlay.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				VideoItem vi = new VideoItem();
+				vi.setId("5ivMeA5peBQ");
+				vi.setDescription("Mac Ke Anh - description");
+				vi.setThumbnailURL("http://i3.ytimg.com/vi/5ivMeA5peBQ/hqdefault.jpg");
+				vi.setTitle("Mac Ke Anh");
+				_lstVideoInQueue.add(vi);
+				youtubePlayer.loadVideo(vi.getId());
+			}
+		});
+	}
+
+	void initButtons() {
 		btnLeaveZoomMeeting = (ImageButton)findViewById(R.id.btnLeaveZoomMeeting);
 		btnSwitchToNextCamera = (ImageButton)findViewById(R.id.btnSwitchToNextCamera);
 		btnAudio = (ImageButton)findViewById(R.id.btnAudio);
@@ -104,7 +142,7 @@ public class MyMeetingActivity extends MeetingActivity {
 
 			@Override
 			public void onClick(View v) {
-				ZoomSDK.getInstance().getMeetingService().leaveCurrentMeeting(true);
+				zoomSDK.getMeetingService().leaveCurrentMeeting(true);
 			}
 		});
 
@@ -136,26 +174,28 @@ public class MyMeetingActivity extends MeetingActivity {
 				showParticipants();
 			}
 		});
+	}
 
-		initRoomInfo();
-		initSongSearching();
-		initSongQueue();
-		initYoutube();
+	private void initRoomInfo() {
+		_txtRoomId = (TextView)findViewById(R.id.txtRoomID);
+		_txtPassword = (TextView)findViewById(R.id.txtPassword);
+		meetingInfo = MeetingInfo.getInstance();
+		String roomId = meetingInfo.getMeetingId();
+		final String[] password = {meetingInfo.getPassword()};
 
-		// for testing purposes
-		btnPlay = findViewById(R.id.btnPlay);
-		btnPlay.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				VideoItem vi = new VideoItem();
-				vi.setId("5ivMeA5peBQ");
-				vi.setDescription("Mac Ke Anh - description");
-				vi.setThumbnailURL("http://i3.ytimg.com/vi/5ivMeA5peBQ/hqdefault.jpg");
-				vi.setTitle("Mac Ke Anh");
-				_lstVideoInQueue.add(vi);
-				youtubePlayer.loadVideo(vi.getId());
-			}
-		});
+		Log.d("[ZOOM]", "Room id = " + roomId);
+		Log.d("[ZOOM]", "Password = " + password[0]);
+
+		_txtRoomId.setText(roomId);
+		_txtPassword.setText(password[0]);
+
+		mFirebaseInstance = FirebaseDatabase.getInstance();
+		mFirebaseDatabase = mFirebaseInstance.getReference("room").child(roomId);
+		if (password[0] != "??????")
+			mFirebaseDatabase.child("password").setValue(password[0]);
+
+		mQueueDatabase = mFirebaseDatabase.child("queue");
+		mQueueDatabase.addValueEventListener(onSongQueueChange);
 	}
 
 	private void initSongQueue() {
@@ -170,95 +210,30 @@ public class MyMeetingActivity extends MeetingActivity {
 		});
 	}
 
-	private void initRoomInfo() {
-		_txtRoomId = (TextView)findViewById(R.id.txtRoomID);
-		_txtPassword = (TextView)findViewById(R.id.txtPassword);
-		meetingInfo = MeetingInfo.getInstance();
-		String roomId = meetingInfo.getMeetingId();
-		final String[] password = {meetingInfo.getPassword()};
-
-		Log.d("[ZOOM]", "Room id = " + roomId);
-		Log.d("[ZOOM]", "Password = " + password[0]);
-
-		// fetch password for new room
-//		if (password[0] == "??????") {
-//			OkHttpClient client = new OkHttpClient();
-//			Request request = new Request.Builder()
-//					.url("https://api.zoom.us/v2/meetings/"+roomId)
-//					.get()
-//					.addHeader("authorization", "Bearer "+ JWT_TOKEN)
-//					.build();
-//			client.newCall(request).enqueue(new Callback() {
-//				@Override
-//				public void onFailure(Request request, IOException e) {
-//					Log.e("Error","Failed to connect: "+e.getMessage());
-//				}
-//
-//				@Override
-//				public void onResponse(Response response) throws IOException {
-//					String x = response.body().string();
-//					try {
-//						JSONObject json = new JSONObject(x);
-//						password[0] = json.getString("password");
-//						_txtPassword.setText(password[0]);
-//						meetingInfo.setPassword(password[0]);
-//					} catch (JSONException e) {
-//						e.printStackTrace();
-//					}
-//
-//				}
-//			});
-//		}
-		_txtRoomId.setText(roomId);
-		_txtPassword.setText(password[0]);
-
-		mFirebaseInstance = FirebaseDatabase.getInstance();
-
-		mFirebaseDatabase = mFirebaseInstance.getReference("room").child(roomId);
-		if (password[0] != "??????")
-			mFirebaseDatabase.child("password").setValue(password[0]);
-		else {
-
+	private ValueEventListener onSongQueueChange = new ValueEventListener() {
+		@Override
+		public void onDataChange(@NonNull DataSnapshot snapshot) {
+			ArrayList<VideoItem> newLst = new ArrayList<>();
+			for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+				newLst.add(postSnapshot.getValue(VideoItem.class));
+			}
+			if (_lstVideoInQueue.isEmpty() || newLst.isEmpty() || _lstVideoInQueue.get(0).getId() != newLst.get(0).getId()) {
+				if (!newLst.isEmpty())
+					youtubePlayer.loadVideo(newLst.get(0).getId());
+				else {
+					if (youtubePlayer.isPlaying())
+						youtubePlayer.seekToMillis(youtubePlayer.getDurationMillis());
+				}
+				Log.d("[FIREBASE]", "Update: new queue size is " + newLst.size());
+			}
+			_lstVideoInQueue = newLst;
 		}
-		mQueueDatabase = mFirebaseDatabase.child("queue");
-		mQueueDatabase.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot snapshot) {
-				ArrayList<VideoItem> newLst = new ArrayList<>();
-				for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-            		newLst.add(postSnapshot.getValue(VideoItem.class));
-				}
-				if (_lstVideoInQueue.isEmpty() || newLst.isEmpty() || _lstVideoInQueue.get(0).getId() != newLst.get(0).getId()) {
-					if (!newLst.isEmpty())
-						youtubePlayer.loadVideo(newLst.get(0).getId());
-					else {
-						if (youtubePlayer.isPlaying())
-							youtubePlayer.seekToMillis(youtubePlayer.getDurationMillis());
-					}
-					Log.d("[FIREBASE]", "Update: new queue size is " + newLst.size());
-				}
-				_lstVideoInQueue = newLst;
-			}
 
-			@Override
-			public void onCancelled(@NonNull DatabaseError error) {
-				Log.w("Get data", "Failed to read value.", error.toException());
-			}
-		});
-	}
-
-	// 4PJ3Ye
-	private void initSongSearching() {
-		ImageButton btnSearch = (ImageButton) findViewById(R.id.btnSearchSong);
-		btnSearch.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(MyMeetingActivity.this, com.nero.zikzok.youtube.MainActivity.class);
-				startActivityForResult(intent, REQUEST_CODE_SEARCH_MUSIC);
-			}
-		});
-	}
-
+		@Override
+		public void onCancelled(@NonNull DatabaseError error) {
+			Log.w("Get data", "Failed to read from Firebase.", error.toException());
+		}
+	};
 
 	private void initYoutube() {
 		YouTubePlayerFragment youTubePlayerFragment = (YouTubePlayerFragment) getFragmentManager().findFragmentById(R.id.youtubeFragment);
@@ -346,24 +321,33 @@ public class MyMeetingActivity extends MeetingActivity {
 		});
 	}
 
+	// 4PJ3Ye
+	private void initSongSearching() {
+		ImageButton btnSearch = (ImageButton) findViewById(R.id.btnSearchSong);
+		btnSearch.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MyMeetingActivity.this, com.nero.zikzok.youtube.MainActivity.class);
+				startActivityForResult(intent, REQUEST_CODE_SEARCH_MUSIC);
+			}
+		});
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == REQUEST_CODE_SEARCH_MUSIC) {
 			if (resultCode == Activity.RESULT_OK) {
 				VideoItem video = (VideoItem) data.getSerializableExtra("VIDEO_INFO");
-				addSongToQueue(video);
+				// add song to queue
+				DatabaseReference pushedVideoRef = mQueueDatabase.push();
+				pushedVideoRef.setValue(video);
 				Toast.makeText(this, video.getTitle(), Toast.LENGTH_LONG).show();
 			}
 			else {
 				Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
 			}
 		}
-	}
-
-	private void addSongToQueue(VideoItem video) {
-		DatabaseReference pushedVideoRef = mQueueDatabase.push();
-		pushedVideoRef.setValue(video);
 	}
 
 	@Override
@@ -397,15 +381,16 @@ public class MyMeetingActivity extends MeetingActivity {
 	}
 
 	@Override
+	public void onDestroy() {
+		inMeetingService.removeListener(this);
+		super.onDestroy();
+	}
+
+	@Override
 	protected void onMeetingConnected() {
 		updateButtonsStatus();
 	}
-	
-	@Override
-	protected void onSilentModeChanged(boolean inSilentMode) {
-		updateButtonsStatus();
-	}
-	
+
 	@Override
 	protected void onStartShare() {
 //		btnShare.setVisibility(View.GONE);
@@ -419,15 +404,14 @@ public class MyMeetingActivity extends MeetingActivity {
 	}
 
 	private void updateButtonsStatus() {
-		
 		boolean enabled = (isMeetingConnected() && !isInSilentMode());
-		
+
 		btnSwitchToNextCamera.setEnabled(enabled);
 		btnAudio.setEnabled(enabled);
 		btnParticipants.setEnabled(enabled);
 //		btnShare.setEnabled(enabled);
 //		btnMoreOptions.setEnabled(enabled);
-		
+
 //		if(isSharingOut()) {
 //			btnShare.setVisibility(View.GONE);
 //			btnStopShare.setVisibility(View.VISIBLE);
@@ -435,5 +419,195 @@ public class MyMeetingActivity extends MeetingActivity {
 //			btnShare.setVisibility(View.VISIBLE);
 //			btnStopShare.setVisibility(View.GONE);
 //		}
+	}
+
+	@Override
+	public void onMeetingNeedPasswordOrDisplayName(boolean b, boolean b1, InMeetingEventHandler inMeetingEventHandler) {
+
+	}
+
+	@Override
+	public void onWebinarNeedRegister() {
+
+	}
+
+	@Override
+	public void onJoinWebinarNeedUserNameAndEmail(InMeetingEventHandler inMeetingEventHandler) {
+
+	}
+
+	@Override
+	public void onMeetingNeedColseOtherMeeting(InMeetingEventHandler inMeetingEventHandler) {
+
+	}
+
+	@Override
+	public void onMeetingFail(int i, int i1) {
+
+	}
+
+	@Override
+	public void onMeetingLeaveComplete(long ret) {
+		Log.d("[ZOOM]", "On meeting leave " + ret);
+		Log.d("[ZOOM]", "User ID = " + inMeetingService.getMyUserID());
+		Log.d("[ZOOM]", "is host: " + inMeetingService.isMeetingHost());
+		if (ret == END_BY_HOST || (inMeetingService.isMeetingHost() && ret == END_BY_SELF)) {
+			mFirebaseDatabase.removeValue();
+		}
+	}
+
+	@Override
+	public void onMeetingUserJoin(List<Long> list) {
+
+	}
+
+	@Override
+	public void onMeetingUserLeave(List<Long> list) {
+
+	}
+
+	@Override
+	public void onMeetingUserUpdated(long l) {
+
+	}
+
+	@Override
+	public void onMeetingHostChanged(long l) {
+
+	}
+
+	@Override
+	public void onMeetingCoHostChanged(long l) {
+
+	}
+
+	@Override
+	public void onActiveVideoUserChanged(long l) {
+
+	}
+
+	@Override
+	public void onActiveSpeakerVideoUserChanged(long l) {
+
+	}
+
+	@Override
+	public void onSpotlightVideoChanged(boolean b) {
+
+	}
+
+	@Override
+	public void onUserVideoStatusChanged(long l) {
+
+	}
+
+	@Override
+	public void onUserVideoStatusChanged(long l, VideoStatus videoStatus) {
+
+	}
+
+	@Override
+	public void onUserNetworkQualityChanged(long l) {
+
+	}
+
+	@Override
+	public void onMicrophoneStatusError(InMeetingAudioController.MobileRTCMicrophoneError mobileRTCMicrophoneError) {
+
+	}
+
+	@Override
+	public void onUserAudioStatusChanged(long l) {
+
+	}
+
+	@Override
+	public void onUserAudioStatusChanged(long l, AudioStatus audioStatus) {
+
+	}
+
+	@Override
+	public void onHostAskUnMute(long l) {
+
+	}
+
+	@Override
+	public void onHostAskStartVideo(long l) {
+
+	}
+
+	@Override
+	public void onUserAudioTypeChanged(long l) {
+
+	}
+
+	@Override
+	public void onMyAudioSourceTypeChanged(int i) {
+
+	}
+
+	@Override
+	public void onLowOrRaiseHandStatusChanged(long l, boolean b) {
+
+	}
+
+	@Override
+	public void onMeetingSecureKeyNotification(byte[] bytes) {
+
+	}
+
+	@Override
+	public void onChatMessageReceived(InMeetingChatMessage inMeetingChatMessage) {
+
+	}
+
+	@Override
+	public void onSilentModeChanged(boolean inSilentMode) {
+		updateButtonsStatus();
+	}
+
+	@Override
+	public void onFreeMeetingReminder(boolean b, boolean b1, boolean b2) {
+
+	}
+
+	@Override
+	public void onMeetingActiveVideo(long l) {
+
+	}
+
+	@Override
+	public void onSinkAttendeeChatPriviledgeChanged(int i) {
+
+	}
+
+	@Override
+	public void onSinkAllowAttendeeChatNotification(int i) {
+
+	}
+
+	@Override
+	public void onUserNameChanged(long l, String s) {
+
+	}
+
+	@Override
+	public void onFreeMeetingNeedToUpgrade(FreeMeetingNeedUpgradeType freeMeetingNeedUpgradeType, String s) {
+
+	}
+
+	@Override
+	public void onFreeMeetingUpgradeToGiftFreeTrialStart() {
+
+	}
+
+	@Override
+	public void onFreeMeetingUpgradeToGiftFreeTrialStop() {
+
+	}
+
+	@Override
+	public void onFreeMeetingUpgradeToProMeeting() {
+
 	}
 }
