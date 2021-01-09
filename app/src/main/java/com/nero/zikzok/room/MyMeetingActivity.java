@@ -7,6 +7,7 @@ import us.zoom.sdk.InMeetingEventHandler;
 import us.zoom.sdk.InMeetingService;
 import us.zoom.sdk.InMeetingServiceListener;
 import us.zoom.sdk.MeetingActivity;
+import us.zoom.sdk.MeetingService;
 import us.zoom.sdk.ZoomSDK;
 
 import android.app.Activity;
@@ -83,6 +84,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 
 	MeetingInfo meetingInfo;
 	ZoomSDK zoomSDK;
+	MeetingService meetingService;
 	InMeetingService inMeetingService;
 
 	@Override
@@ -107,6 +109,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
 		zoomSDK = ZoomSDK.getInstance();
+		meetingService = zoomSDK.getMeetingService();
 		inMeetingService = zoomSDK.getInMeetingService();
 		inMeetingService.addListener(this);
 
@@ -142,7 +145,9 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 
 			@Override
 			public void onClick(View v) {
-				zoomSDK.getMeetingService().leaveCurrentMeeting(true);
+				if (meetingService.isCurrentMeetingHost())
+					mFirebaseDatabase.removeValue();
+				meetingService.leaveCurrentMeeting(true);
 			}
 		});
 
@@ -448,12 +453,6 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 
 	@Override
 	public void onMeetingLeaveComplete(long ret) {
-		Log.d("[ZOOM]", "On meeting leave " + ret);
-		Log.d("[ZOOM]", "User ID = " + inMeetingService.getMyUserID());
-		Log.d("[ZOOM]", "is host: " + inMeetingService.isMeetingHost());
-		if (ret == END_BY_HOST || (inMeetingService.isMeetingHost() && ret == END_BY_SELF)) {
-			mFirebaseDatabase.removeValue();
-		}
 	}
 
 	@Override
@@ -473,7 +472,6 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 
 	@Override
 	public void onMeetingHostChanged(long l) {
-
 	}
 
 	@Override

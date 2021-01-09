@@ -146,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
                     String zak = json.getString("token");
                     MeetingInfo meetingInfo = MeetingInfo.getInstance();
                     meetingInfo.setZak(zak);
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -185,9 +184,15 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     private void initJoinRoom() {
         final SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+
         _viewJoinRoom = LayoutInflater.from(this).inflate(R.layout.join_room, null);
-        ((EditText) _viewJoinRoom.findViewById(R.id.txtRoomID)).setText(sharedPreferences.getString(LAST_ROOM_ID_KEY, ""));
-        ((EditText) _viewJoinRoom.findViewById(R.id.txtUsername)).setText(sharedPreferences.getString(LAST_USERNAME_KEY, ""));
+
+        final EditText _textRoomID = _viewJoinRoom.findViewById(R.id.txtRoomID);
+        final EditText _textUsername = _viewJoinRoom.findViewById(R.id.txtUsername);
+
+        _textRoomID.setText(sharedPreferences.getString(LAST_ROOM_ID_KEY, ""));
+        _textUsername.setText(sharedPreferences.getString(LAST_USERNAME_KEY, ""));
+
         _btnJoinRoom.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -206,12 +211,12 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         _btnJoinRoomFinal.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String _roomID = String.valueOf(((EditText)_viewJoinRoom.findViewById(R.id.txtRoomID)).getText());
-                String _username = String.valueOf(((EditText)_viewJoinRoom.findViewById(R.id.txtUsername)).getText());
+                String _roomID = String.valueOf(_textRoomID.getText());
+                String _username = String.valueOf(_textUsername.getText());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(LAST_ROOM_ID_KEY, _roomID);
                 editor.putString(LAST_USERNAME_KEY, _username);
-                editor.commit();
+                editor.apply();
                 joinRoom(_roomID, _username);
             }
         });
@@ -222,7 +227,12 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     }
 
     private void initCreateRoom() {
+        final SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+
         _viewCreateRoom = LayoutInflater.from(this).inflate(R.layout.create_room, null);
+        final EditText _textUsername = _viewCreateRoom.findViewById(R.id.txtUsername);
+        _textUsername.setText(sharedPreferences.getString(LAST_USERNAME_KEY, ""));
+
         _btnCreateRoom.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -236,11 +246,12 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
                 popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
             }
         });
-        _btnCreateRoomFinal = (Button) _viewCreateRoom.findViewById(R.id.btnCreateRoomFinal);
+        _btnCreateRoomFinal = _viewCreateRoom.findViewById(R.id.btnCreateRoomFinal);
         _btnCreateRoomFinal.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String _username = String.valueOf(((EditText)_viewCreateRoom.findViewById(R.id.txtUsername)).getText());
+                String _username = String.valueOf(_textUsername.getText());
+                sharedPreferences.edit().putString(LAST_USERNAME_KEY, _username).apply();
                 createRoom(_username);
             }
         });
@@ -277,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     private void registerMeetingServiceListener() {
         MeetingService meetingService = zoomSDK.getMeetingService();
-        if(meetingService != null) {
+        if (meetingService != null) {
             meetingService.addListener(this);
         }
     }
@@ -288,7 +299,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             MeetingService meetingService = zoomSDK.getMeetingService();
             meetingService.removeListener(this);
         }
-
         super.onDestroy();
     }
 
@@ -296,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
         meetingInfo.setPassword("6M6k56");
-        ZoomSDK zoomSDK = ZoomSDK.getInstance();
+        zoomSDK = ZoomSDK.getInstance();
 
         if(!zoomSDK.isInitialized()) {
             Toast.makeText(this, "ZoomSDK has not been initialized successfully", Toast.LENGTH_LONG).show();
@@ -400,8 +410,6 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         params.displayName = username;
         params.zoomAccessToken = MeetingInfo.getInstance().getZak();
         meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
-        Log.d("[ZOOM]", "User ID = " + zoomSDK.getInMeetingService().getMyUserID());
-        Log.d("[ZOOM]", "Is host: " + zoomSDK.getInMeetingService().isMeetingHost());
     }
 
     @Override
@@ -421,5 +429,4 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     public void onZoomAuthIdentityExpired() {
 
     }
-
 }
