@@ -30,7 +30,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragment;
@@ -42,6 +45,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.nero.zikzok.MainActivity;
+import com.nero.zikzok.MainViewModel;
 import com.nero.zikzok.R;
 import com.nero.zikzok.youtube.VideoItem;
 import com.squareup.okhttp.Callback;
@@ -146,6 +150,20 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 			public void onClick(View v) {
 				if (meetingService.isCurrentMeetingHost())
 					mFirebaseDatabase.removeValue();
+				mFirebaseInstance.getReference("zoom/accounts").orderByChild("user_id").equalTo(MainViewModel.USER_ID).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+					@Override
+					public void onComplete(@NonNull Task<DataSnapshot> task) {
+						DataSnapshot result = task.getResult();
+						if (result.exists()) {
+							for (DataSnapshot data : result.getChildren()) {
+								String user_id = (String) data.child("user_id").getValue();
+								data.getRef().child("in_use").setValue(false);
+							}
+						}
+						else
+							Log.e("[FIREBASE]", "Account used to create meeting no longer exists");
+					}
+				});
 				meetingService.leaveCurrentMeeting(true);
 			}
 		});

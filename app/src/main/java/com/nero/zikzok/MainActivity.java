@@ -65,6 +65,7 @@ import java.util.concurrent.CountDownLatch;
 import static com.nero.zikzok.room.Constants.SDK_KEY;
 import static com.nero.zikzok.room.Constants.SDK_SECRET;
 import static com.nero.zikzok.room.Constants.WEB_DOMAIN;
+import static us.zoom.sdk.MeetingError.MEETING_ERROR_SUCCESS;
 import static us.zoom.sdk.MeetingService.USER_TYPE_ZOOM;
 
 public class MainActivity extends AppCompatActivity implements MeetingServiceListener, ZoomSDKInitializeListener {
@@ -111,72 +112,23 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         setContentView(R.layout.activity_main);
 
         zoomSDK = ZoomSDK.getInstance();
+        if (savedInstanceState == null)
+            initZoomSdk();
 
-        if(savedInstanceState == null) {
-            ZoomSDKInitParams initParams = new ZoomSDKInitParams();
-            initParams.appKey = SDK_KEY;
-            initParams.appSecret = SDK_SECRET;
-            initParams.domain= WEB_DOMAIN;
-            //initParams.videoRawDataMemoryMode = ZoomSDKRawDataMemoryMode.ZoomSDKRawDataMemoryModeStack;
-            zoomSDK.initialize(getApplicationContext(), this, initParams);
-        }
-
-        if(zoomSDK.isInitialized()) {
+        if(zoomSDK.isInitialized())
             registerMeetingServiceListener();
-        }
 
         mFirebaseInstance = FirebaseDatabase.getInstance();
-        mFirebaseInstance.getReference("zoom/accounts").orderByChild("in_use").equalTo(false).limitToFirst(1).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                DataSnapshot result = task.getResult();
-                if (result.exists() && result.getChildrenCount() > 0) {
-                    for (DataSnapshot data : result.getChildren()) {
-                        accountReference = data.getRef();
-                        USER_ID = (String) data.child("user_id").getValue();
-                        JWT_TOKEN = (String) data.child("jwt_token").getValue();
-                        Log.d("[FIREBASE]", "User_id = " + USER_ID);
-                        Log.d("[FIREBASE]", "jwt_token = " + JWT_TOKEN);
-
-                        initZoomAccessToken();
-                        initComponents();
-                    }
-                }
-                else
-                    Toast.makeText(getApplicationContext(), "Out of Zoom account to create room", Toast.LENGTH_LONG).show();
-            }
-        });
+        initComponents();
     }
 
-    private void initZoomAccessToken() {
-        OkHttpClient client = new OkHttpClient();
-
-        Request request = new Request.Builder()
-                .url("https://api.zoom.us/v2/users/"+USER_ID+"/token?type=zak")
-                .get()
-                .addHeader("authorization", "Bearer "+ JWT_TOKEN)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                Log.i("Error","Failed to connect: "+e.getMessage());
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                // Log.d(TAG, response.body().string());
-                String x = response.body().string();
-                try {
-                    JSONObject json = new JSONObject(x);
-                    String zak = json.getString("token");
-                    MeetingInfo meetingInfo = MeetingInfo.getInstance();
-                    meetingInfo.setZak(zak);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+    private void initZoomSdk() {
+        ZoomSDKInitParams initParams = new ZoomSDKInitParams();
+        initParams.appKey = SDK_KEY;
+        initParams.appSecret = SDK_SECRET;
+        initParams.domain = WEB_DOMAIN;
+        //initParams.videoRawDataMemoryMode = ZoomSDKRawDataMemoryMode.ZoomSDKRawDataMemoryModeStack;
+        zoomSDK.initialize(getApplicationContext(), this, initParams);
     }
 
     private void initComponents() {
@@ -278,9 +230,26 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         _btnCreateRoomFinal.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                String _username = String.valueOf(_textUsername.getText());
+                final String _username = String.valueOf(_textUsername.getText());
                 sharedPreferences.edit().putString(LAST_USERNAME_KEY, _username).apply();
-                createRoom(_username);
+                mFirebaseInstance.getReference("zoom/accounts").orderByChild("in_use").equalTo(false).limitToFirst(1).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DataSnapshot> task) {
+                        DataSnapshot result = task.getResult();
+                        if (result.exists() && result.getChildrenCount() > 0) {
+                            for (DataSnapshot data : result.getChildren()) {
+                                accountReference = data.getRef();
+                                USER_ID = (String) data.child("user_id").getValue();
+                                JWT_TOKEN = (String) data.child("jwt_token").getValue();
+                                Log.d("[FIREBASE]", "User_id = " + USER_ID);
+                                Log.d("[FIREBASE]", "jwt_token = " + JWT_TOKEN);
+                                createRoomStage1(_username);
+                            }
+                        }
+                        else
+                            Toast.makeText(getApplicationContext(), "Out of Zoom account to create room", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
     }
@@ -366,7 +335,45 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         Log.i(TAG, "onClickBtnStartMeeting, ret=" + ret);
     }
 
-    public void createRoom(final String username) {
+    private void createRoomStage1(final String username) {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://api.zoom.us/v2/users/"+USER_ID+"/token?type=zak")
+                .get()
+                .addHeader("authorization", "Bearer "+ JWT_TOKEN)
+                .build();
+
+        final ProgressDialog _progressDialog = new ProgressDialog(this);
+        _progressDialog.setTitle("Creating room...");
+        _progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        _progressDialog.setMessage("Wait a few seconds...");
+        _progressDialog.show();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.i("Error","Failed to connect: "+e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                // Log.d(TAG, response.body().string());
+                String x = response.body().string();
+                try {
+                    JSONObject json = new JSONObject(x);
+                    String zak = json.getString("token");
+                    MeetingInfo meetingInfo = MeetingInfo.getInstance();
+                    meetingInfo.setZak(zak);
+                    createRoomStage2(username);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                _progressDialog.dismiss();
+            }
+        });
+    }
+
+    public void createRoomStage2(final String username) {
         Log.i("[ZOOM]", "Creating room");
         OkHttpClient client = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
@@ -378,11 +385,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
                 .addHeader("authorization", "Bearer " + JWT_TOKEN)
                 .build();
 
-        final ProgressDialog _progressDialog = new ProgressDialog(this);
-        _progressDialog.setTitle("Creating room...");
-        _progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        _progressDialog.setMessage("Wait a few seconds...");
-        _progressDialog.show();
+
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -397,17 +400,15 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
                     JSONObject json = new JSONObject(x);
                     String roomID = json.getString("id");
                     String password = json.getString("password");
-                    createRoom(username, roomID, password);
-
+                    createRoomStage3(username, roomID, password);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                _progressDialog.dismiss();
             }
         });
     }
 
-    public void createRoom(String username, String roomId, String password) {
+    public void createRoomStage3(String username, String roomId, String password) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
         meetingInfo.setPassword(password);
@@ -439,7 +440,10 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         params.displayName = username;
         params.zoomAccessToken = MeetingInfo.getInstance().getZak();
         Log.d("[ZOOM]", "User ID = " + USER_ID);
+        MainViewModel.USER_ID = USER_ID;
         int ret = meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
+        if (ret == MEETING_ERROR_SUCCESS)
+            accountReference.child("in_use").setValue(true);
         Log.d("[ZOOM]", "Create room ret = " + ret);
     }
 
