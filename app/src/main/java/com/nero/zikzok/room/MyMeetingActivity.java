@@ -239,7 +239,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 			for (DataSnapshot postSnapshot: snapshot.getChildren()) {
 				newLst.add(postSnapshot.getValue(VideoItem.class));
 			}
-			if (_lstVideoInQueue.isEmpty() || newLst.isEmpty() || _lstVideoInQueue.get(0).getId() != newLst.get(0).getId()) {
+			if ((_lstVideoInQueue.isEmpty() || newLst.isEmpty() || _lstVideoInQueue.get(0).getId() != newLst.get(0).getId()) && youtubePlayer != null) {
 				if (!newLst.isEmpty())
 					youtubePlayer.loadVideo(newLst.get(0).getId());
 				else {
