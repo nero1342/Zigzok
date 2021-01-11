@@ -52,7 +52,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 	private ImageButton btnSwitchToNextCamera;
 	private ImageButton btnAudio;
 	private ImageButton btnParticipants;
-	private ImageButton btnPlay;
+	private ImageButton btnSkip;
 
 	private TextView _txtRoomId;
 	private TextView _txtPassword;
@@ -103,26 +103,13 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 		is_playing = false;
 		meetingInfo = MeetingInfo.getInstance();
 
-		initButtons();
 		initRoomInfo();
-		initSongQueue();
 		initYoutube();
+		initButtons();
+		initSongQueue();
 		initSongSearching();
 
-		// for testing purposes
-		btnPlay = findViewById(R.id.btnPlay);
-		btnPlay.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				VideoItem vi = new VideoItem();
-				vi.setId("5ivMeA5peBQ");
-				vi.setDescription("Mac Ke Anh - description");
-				vi.setThumbnailURL("http://i3.ytimg.com/vi/5ivMeA5peBQ/hqdefault.jpg");
-				vi.setTitle("Mac Ke Anh");
-				_lstVideoInQueue.add(vi);
-				youtubePlayer.loadVideo(vi.getId());
-			}
-		});
+
 	}
 
 	void initButtons() {
@@ -186,6 +173,14 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 			@Override
 			public void onClick(View v) {
 				showParticipants();
+			}
+		});
+
+		btnSkip = findViewById(R.id.btnSkip);
+		btnSkip.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				youtubePlayer.seekToMillis(youtubePlayer.getDurationMillis());
 			}
 		});
 	}
