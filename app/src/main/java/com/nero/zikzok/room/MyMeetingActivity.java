@@ -70,6 +70,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 	InMeetingService inMeetingService;
 
 	boolean is_current_owner;
+	boolean is_playing;
 
 	@Override
 	protected int getLayout() {
@@ -98,6 +99,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 		inMeetingService.addListener(this);
 
 		is_current_owner = false;
+		is_playing = false;
 		meetingInfo = MeetingInfo.getInstance();
 
 		initButtons();
@@ -250,7 +252,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 	private ValueEventListener onResumePlaying = new ValueEventListener() {
 		@Override
 		public void onDataChange(@NonNull DataSnapshot snapshot) {
-			boolean is_playing = (boolean) snapshot.getValue();
+			is_playing = (boolean) snapshot.getValue();
 			if (is_playing && !youtubePlayer.isPlaying())
 				youtubePlayer.play();
 			else if (!is_playing && youtubePlayer.isPlaying())
@@ -334,7 +336,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 						if (is_current_owner) {
 							mFirebaseDatabase.child("is_playing").setValue(false);
 						}
-						else
+						else if (is_playing)
 							player.play();
 					}
 
