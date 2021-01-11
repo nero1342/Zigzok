@@ -195,7 +195,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/btnPlay"
             android:layout_weight="1"
-            android:src="@drawable/playicon"
+            android:src="@drawable/skip"
             android:background="#EAEE29"/>
     </LinearLayout>
     <fragment
