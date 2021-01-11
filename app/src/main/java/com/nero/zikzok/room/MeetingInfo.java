@@ -13,11 +13,9 @@ public class MeetingInfo {
         return instance;
     }
 
-    public static void setInstance(MeetingInfo instance) {
-        MeetingInfo.instance = instance;
-    }
-
+    private String user_id;     // only exists when creating room
     private String meetingId;
+    private String username;
     private String password;
     private String zak;
 
@@ -43,5 +41,21 @@ public class MeetingInfo {
 
     public void setZak(String zak) {
         this.zak = zak;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

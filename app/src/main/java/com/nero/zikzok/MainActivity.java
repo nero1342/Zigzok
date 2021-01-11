@@ -48,8 +48,10 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.nero.zikzok.room.MeetingInfo;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -246,12 +248,11 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
             public void onClick(View v) {
                 final String _username = String.valueOf(_textUsername.getText());
                 sharedPreferences.edit().putString(LAST_USERNAME_KEY, _username).apply();
-                mFirebaseInstance.getReference("zoom/accounts").orderByChild("in_use").equalTo(false).limitToFirst(1).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                mFirebaseInstance.getReference("zoom/accounts").orderByChild("in_use").equalTo(false).limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onComplete(@NonNull Task<DataSnapshot> task) {
-                        DataSnapshot result = task.getResult();
-                        if (result.exists() && result.getChildrenCount() > 0) {
-                            for (DataSnapshot data : result.getChildren()) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists() && snapshot.getChildrenCount() > 0) {
+                            for (DataSnapshot data : snapshot.getChildren()) {
                                 accountReference = data.getRef();
                                 USER_ID = (String) data.child("user_id").getValue();
                                 JWT_TOKEN = (String) data.child("jwt_token").getValue();
@@ -262,6 +263,11 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
                         }
                         else
                             Toast.makeText(getApplicationContext(), "Out of Zoom account to create room", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
                     }
                 });
             }
@@ -316,6 +322,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     private void joinRoom(String roomId, String username, String _password) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
+        meetingInfo.setUsername(username);
         meetingInfo.setMeetingId(roomId);
         meetingInfo.setPassword(_password);
         zoomSDK = ZoomSDK.getInstance();
@@ -371,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
             @Override
             public void onResponse(Response response) throws IOException {
-                // Log.d(TAG, response.body().string());
+                Log.d("[ZOOM]", "Stage 1 response = " + response.body().string());
                 String x = response.body().string();
                 try {
                     JSONObject json = new JSONObject(x);
@@ -408,7 +415,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
             @Override
             public void onResponse(Response response) throws IOException {
-                // Log.d(TAG, response.body().string());
+                Log.d("[ZOOM]", response.body().string());
                 String x = response.body().string();
                 try {
                     JSONObject json = new JSONObject(x);
@@ -425,7 +432,9 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
     public void createRoomStage3(String username, String roomId, String password) {
         MeetingInfo meetingInfo = MeetingInfo.getInstance();
         meetingInfo.setMeetingId(roomId);
+        meetingInfo.setUsername(username);
         meetingInfo.setPassword(password);
+        meetingInfo.setUser_id(USER_ID);
 
         if(!zoomSDK.isInitialized()) {
             Toast.makeText(this, "ZoomSDK has not been initialized successfully", Toast.LENGTH_LONG).show();
@@ -454,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
         params.displayName = username;
         params.zoomAccessToken = MeetingInfo.getInstance().getZak();
         Log.d("[ZOOM]", "User ID = " + USER_ID);
-        MainViewModel.USER_ID = USER_ID;
+
         int ret = meetingService.startMeetingWithParams(getApplicationContext(), params, opts);
         if (ret == MEETING_ERROR_SUCCESS)
             accountReference.child("in_use").setValue(true);

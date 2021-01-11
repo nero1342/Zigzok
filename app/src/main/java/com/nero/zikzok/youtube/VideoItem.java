@@ -17,6 +17,9 @@ public class VideoItem implements Serializable {
     //stores the url of thumbnail of video
     private String thumbnailURL;
 
+    //stores the person who request this ong
+    private String owner;
+
 
     //getter and setter methods for id
     public String getId() {
@@ -57,4 +60,11 @@ public class VideoItem implements Serializable {
         this.thumbnailURL = thumbnail;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 }
