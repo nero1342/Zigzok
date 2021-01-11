@@ -228,17 +228,23 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 			if ((_lstVideoInQueue.isEmpty() || newLst.isEmpty() || _lstVideoInQueue.get(0).getId() != newLst.get(0).getId()) && youtubePlayer != null) {
 				if (!newLst.isEmpty()) {
 					VideoItem topSong = newLst.get(0);
-					if (topSong.getOwner() == meetingInfo.getUsername())
+					Log.d("[FIREBASE]", "Top song owner = " + topSong.getOwner());
+					Log.d("[FIREBASE]", "I am = " + meetingInfo.getUsername());
+					if (topSong.getOwner().equals(meetingInfo.getUsername())) {
 						is_current_owner = true;
-					else
+					}
+					else {
 						is_current_owner = false;
+					}
 					youtubePlayer.cueVideo(topSong.getId());
 				}
 				else {
-					if (youtubePlayer.isPlaying())
+					if (youtubePlayer.isPlaying()) {
 						youtubePlayer.seekToMillis(youtubePlayer.getDurationMillis());
+					}
 				}
 				Log.d("[FIREBASE]", "Update: new queue size is " + newLst.size());
+				Log.d("[FIREBASE]", "Owner status = " + is_current_owner);
 			}
 			_lstVideoInQueue = newLst;
 		}
@@ -294,27 +300,26 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 					@Override
 					public void onVideoEnded() {
 						if (is_current_owner) {
-							mQueueDatabase.orderByKey().limitToFirst(1).getRef().removeValue();
-							Log.d("[YOUTUBE]", "Deleting first song in queue");
+							mQueueDatabase.orderByKey().limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
+								@Override
+								public void onDataChange(@NonNull DataSnapshot snapshot) {
+									for (DataSnapshot song : snapshot.getChildren()) {
+										Log.d("[FIREBASE]", "song = " + song.toString());
+										VideoItem video = song.getValue(VideoItem.class);
+										if (video.getOwner().equals(meetingInfo.getUsername())) {
+											Log.d("[FIREBASE]", "Removing " + song.getValue());
+											song.getRef().removeValue();
+										}
+									}
+								}
+
+								@Override
+								public void onCancelled(@NonNull DatabaseError error) {
+
+								}
+							});
+							Log.d("[YOUTUBE]", "Video ended");
 						}
-//						mQueueDatabase.orderByKey().limitToFirst(1).addListenerForSingleValueEvent(new ValueEventListener() {
-//							@Override
-//							public void onDataChange(@NonNull DataSnapshot snapshot) {
-//								for (DataSnapshot song : snapshot.getChildren()) {
-//									VideoItem video = (VideoItem) song.getValue();
-//									if (video.getOwner() == meetingInfo.getUsername()) {
-//										Log.d("[FIREBASE]", "Removing " + song.getValue());
-//										song.getRef().removeValue();
-//									}
-//								}
-//							}
-//
-//							@Override
-//							public void onCancelled(@NonNull DatabaseError error) {
-//
-//							}
-//						});
-						Log.d("[YOUTUBE]", "Video ended");
 					}
 
 					@Override
@@ -327,7 +332,7 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 					public void onPlaying() {
 						if (is_current_owner)
 							mFirebaseDatabase.child("is_playing").setValue(true);
-						else
+						else if (!is_playing)
 							player.pause();
 					}
 
