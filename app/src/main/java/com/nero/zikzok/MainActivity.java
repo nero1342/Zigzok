@@ -1,5 +1,7 @@
 package com.nero.zikzok;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import us.zoom.sdk.InviteOptions;
 import us.zoom.sdk.JoinMeetingOptions;
 import us.zoom.sdk.JoinMeetingParams;
@@ -21,11 +23,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -105,12 +109,22 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
     ZoomSDK zoomSDK;
 
+    private static final int PERMISSION_CAMERA = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    PERMISSION_CAMERA);
+        }
         zoomSDK = ZoomSDK.getInstance();
         if (savedInstanceState == null)
             initZoomSdk();
