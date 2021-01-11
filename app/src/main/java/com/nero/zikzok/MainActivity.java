@@ -378,8 +378,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
             @Override
             public void onResponse(Response response) throws IOException {
-                Log.d("[ZOOM]", "Stage 1 response = " + response.body().string());
                 String x = response.body().string();
+                Log.d("[ZOOM]", "Stage 1 response = " + x);
                 try {
                     JSONObject json = new JSONObject(x);
                     String zak = json.getString("token");
@@ -415,8 +415,8 @@ public class MainActivity extends AppCompatActivity implements MeetingServiceLis
 
             @Override
             public void onResponse(Response response) throws IOException {
-                Log.d("[ZOOM]", response.body().string());
                 String x = response.body().string();
+                Log.d("[ZOOM]", "Stage 2 response = " + x);
                 try {
                     JSONObject json = new JSONObject(x);
                     String roomID = json.getString("id");

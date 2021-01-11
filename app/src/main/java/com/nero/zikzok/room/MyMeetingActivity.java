@@ -35,6 +35,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.nero.zikzok.MainActivity;
 import com.nero.zikzok.R;
@@ -136,19 +137,20 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 			public void onClick(View v) {
 				if (meetingService.isCurrentMeetingHost())
 					mFirebaseDatabase.removeValue();
-				mFirebaseInstance.getReference("zoom/accounts").orderByChild("user_id").equalTo(meetingInfo.getUser_id()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-					@Override
-					public void onComplete(@NonNull Task<DataSnapshot> task) {
-						DataSnapshot result = task.getResult();
-						if (result.exists()) {
-							for (DataSnapshot data : result.getChildren()) {
-								String user_id = (String) data.child("user_id").getValue();
-								data.getRef().child("in_use").setValue(false);
-							}
-						}
-						else
-							Log.e("[FIREBASE]", "Account used to create meeting no longer exists");
-					}
+				Query query = mFirebaseInstance.getReference("zoom/accounts").orderByChild("user_id").equalTo(meetingInfo.getUser_id());
+				query.addListenerForSingleValueEvent(new ValueEventListener() {
+					 @Override
+					 public void onDataChange(@NonNull DataSnapshot snapshot) {
+						 for (DataSnapshot data : snapshot.getChildren()) {
+							 String user_id = (String) data.child("user_id").getValue();
+							 data.getRef().child("in_use").setValue(false);
+						 }
+					 }
+
+					 @Override
+					 public void onCancelled(@NonNull DatabaseError error) {
+
+					 }
 				});
 				meetingService.leaveCurrentMeeting(true);
 			}
@@ -258,11 +260,15 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 	private ValueEventListener onResumePlaying = new ValueEventListener() {
 		@Override
 		public void onDataChange(@NonNull DataSnapshot snapshot) {
-			is_playing = (boolean) snapshot.getValue();
-			if (is_playing && !youtubePlayer.isPlaying())
-				youtubePlayer.play();
-			else if (!is_playing && youtubePlayer.isPlaying())
-				youtubePlayer.pause();
+			if (snapshot.exists()) {
+				is_playing = (boolean) snapshot.getValue();
+				if (is_playing && !youtubePlayer.isPlaying()) {
+					youtubePlayer.play();
+				}
+				else if (!is_playing && youtubePlayer.isPlaying()) {
+					youtubePlayer.pause();
+				}
+			}
 		}
 
 		@Override
