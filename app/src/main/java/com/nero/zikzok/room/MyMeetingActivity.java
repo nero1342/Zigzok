@@ -154,11 +154,15 @@ public class MyMeetingActivity extends MeetingActivity implements InMeetingServi
 			}
 		});
 
+		final int toggle[] = {0};
 		btnSwitchToNextCamera.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				switchToNextCamera();
+				toggle[0] = (toggle[0] + 1) % 3;
+				if (toggle[0] == 0)
+					muteVideo(!isVideoMuted());
+				else switchToNextCamera();
 			}
 		});
 
